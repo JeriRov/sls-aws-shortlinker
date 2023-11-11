@@ -1,0 +1,12 @@
+{
+  "name": "sls-aws-shortlinker",
+  "version": "1.0.0",
+  "description": "Serverless API for shortening long links.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["serverless", "aws", "shortlinker"],
+  "author": "Artem Magei",
+  "license": "ISC"
+}

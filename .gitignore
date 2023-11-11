@@ -1,0 +1,8 @@
+# JetBraines IDE's files
+.idea
+
+# Node modules
+node_modules
+
+# Environment variables
+.env
