@@ -53,7 +53,7 @@ Which should result in response similar to the following (removed `input` conten
 {
   "message": "Go Serverless v2.0! Your function executed successfully!",
   "input": {
-    ...
+     "_comment": "...request input content..."
   }
 }
 ```
