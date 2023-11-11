@@ -3,9 +3,19 @@
   "version": "1.0.0",
   "description": "Serverless API for shortening long links.",
   "scripts": {
+    "dev": "sls offline start --reloadHandler",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["serverless", "aws", "shortlinker"],
+  "keywords": [
+    "serverless",
+    "aws",
+    "shortlinker"
+  ],
   "author": "Artem Magei",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-offline": "^13.2.1",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.2.2"
+  }
 }

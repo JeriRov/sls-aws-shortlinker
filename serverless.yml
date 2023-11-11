@@ -7,9 +7,12 @@ provider:
   name: aws
   runtime: nodejs18.x
 
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
 functions:
   api:
-    handler: index.handler
+    handler: index.hello
     events:
       - httpApi:
           path: /
