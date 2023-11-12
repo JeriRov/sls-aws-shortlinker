@@ -8,6 +8,7 @@ jspm_packages
 # Environment variables
 .env
 
-# Serverless directories
+# Build folders
 .serverless
 .build
+.esbuild

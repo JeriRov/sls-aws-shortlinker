@@ -10,10 +10,22 @@ provider:
   runtime: nodejs18.x
 
 plugins:
-  - serverless-plugin-typescript
-  - serverless-offline
+  - serverless-esbuild
   - serverless-create-global-dynamodb-table
   - serverless-iam-roles-per-function
+  - serverless-offline
+
+custom:
+  globalTables:
+    version: v2
+    regions:
+      - eu-west-1
+    createStack: false
+  esbuild:
+    bundle: true
+    minify: false
+    target: 'node18'
+    platform: 'node'
 
 functions:
   api:
@@ -22,13 +34,6 @@ functions:
       - httpApi:
           path: /
           method: get
-
-custom:
-  globalTables:
-    version: v2
-    regions:
-      - eu-west-1
-    createStack: false
 
 resources:
   Resources:

@@ -6,10 +6,10 @@
     "noImplicitAny": true,
     "strict": true,
     "allowJs": true,
-    "target": "es5",
+    "target": "ES2020",
     "outDir": ".build",
     "moduleResolution": "node",
-    "lib": ["es2015"],
+    "lib": ["ESNext"],
     "rootDir": "./"
   }
 }

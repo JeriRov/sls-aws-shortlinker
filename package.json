@@ -16,10 +16,14 @@
   "author": "Artem Magei",
   "license": "ISC",
   "devDependencies": {
+    "esbuild": "^0.19.5",
     "serverless-create-global-dynamodb-table": "^3.1.1",
+    "serverless-esbuild": "^1.48.5",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^13.2.1",
-    "serverless-plugin-typescript": "^2.1.5",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@types/node": "^20.9.0"
   }
 }
