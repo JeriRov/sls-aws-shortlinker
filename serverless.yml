@@ -10,6 +10,9 @@ provider:
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
+  - serverless-create-global-dynamodb-table
+  - serverless-iam-roles-per-function
+
 functions:
   api:
     handler: index.hello
@@ -17,3 +20,45 @@ functions:
       - httpApi:
           path: /
           method: get
+
+custom:
+  globalTables:
+    version: v2
+    regions:
+      - us-east-1
+      - eu-west-1
+    createStack: false
+
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: userTable
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    UrlTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: urlTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: UserIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
