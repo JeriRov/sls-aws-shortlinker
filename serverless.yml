@@ -3,6 +3,8 @@ app: sls-shortlinker-app
 service: shortlinker-http-api
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -25,7 +27,6 @@ custom:
   globalTables:
     version: v2
     regions:
-      - us-east-1
       - eu-west-1
     createStack: false
 
