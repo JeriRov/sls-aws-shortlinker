@@ -1,0 +1,70 @@
+org: artemmagej
+app: sls-shortlinker-app
+service: shortlinker-http-api
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+plugins:
+  - serverless-esbuild
+  - serverless-create-global-dynamodb-table
+  - serverless-iam-roles-per-function
+  - serverless-offline
+
+custom:
+  globalTables:
+    version: v2
+    regions:
+      - eu-west-1
+    createStack: false
+  esbuild:
+    bundle: true
+    minify: false
+    target: 'node18'
+    platform: 'node'
+
+functions:
+  api:
+    handler: index.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: userTable
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    UrlTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: urlTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: UserIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL

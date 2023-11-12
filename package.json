@@ -2,11 +2,28 @@
   "name": "sls-aws-shortlinker",
   "version": "1.0.0",
   "description": "Serverless API for shortening long links.",
-  "main": "app.js",
   "scripts": {
+    "build": "sls package",
+    "deploy": "sls deploy",
+    "dev": "sls offline start --reloadHandler",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["serverless", "aws", "shortlinker"],
+  "keywords": [
+    "serverless",
+    "aws",
+    "shortlinker"
+  ],
   "author": "Artem Magei",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.19.5",
+    "serverless-create-global-dynamodb-table": "^3.1.1",
+    "serverless-esbuild": "^1.48.5",
+    "serverless-iam-roles-per-function": "^3.2.0",
+    "serverless-offline": "^13.2.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@types/node": "^20.9.0"
+  }
 }
