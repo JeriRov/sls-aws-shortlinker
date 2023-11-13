@@ -13,9 +13,11 @@ provider:
     URL_TABLE_NAME: urlTable
 
 plugins:
+  - serverless-dotenv-plugin
   - serverless-esbuild
   - serverless-create-global-dynamodb-table
   - serverless-iam-roles-per-function
+  - serverless-dynamodb
   - serverless-offline
 
 custom:
@@ -29,14 +31,35 @@ custom:
     minify: false
     target: 'node18'
     platform: 'node'
+  serverless-dynamodb:
+    stages:
+      - dev
+    start:
+      docker: true
+      port: 8000
+      migrate: true
+      seed: true
+      convertEmptyValues: true
 
 functions:
-  api:
-    handler: index.hello
+  test:
+    handler: handler.test
     events:
       - httpApi:
           path: /
           method: get
+  signUp:
+    handler: handler.signUp
+    events:
+      - httpApi:
+          path: /sign-up
+          method: post
+  signIn:
+    handler: handler.signIn
+    events:
+      - httpApi:
+          path: /sign-in
+          method: post
 
 resources:
   Resources:
