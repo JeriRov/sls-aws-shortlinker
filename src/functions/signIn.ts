@@ -6,7 +6,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
-import {validateCredentials} from '../helpers/validation';
+import { validateCredentials } from '../helpers/validation';
 import { TableNames } from '../helpers/tableNames';
 import { generateTokens } from '../helpers/auth';
 import { AuthRequest } from '../types/Auth';
