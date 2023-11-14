@@ -14,19 +14,24 @@ provider:
     NODE_ENV: ${sls:stage}
 
 plugins:
-  - serverless-dotenv-plugin
   - serverless-esbuild
-  - serverless-create-global-dynamodb-table
-  - serverless-iam-roles-per-function
+  - serverless-dotenv-plugin
+  - serverless-dynamodb-global-table-v2-plugin
   - serverless-dynamodb
   - serverless-offline
 
 custom:
-  globalTables:
-    version: v2
-    regions:
-      - eu-west-1
-    createStack: false
+  globalTablesV2:
+    primaryRegion: us-east-1
+    tables:
+      - table: UserTable
+        addRegions:
+          - eu-west-1
+          - us-west-1
+      - table: UrlTable
+        addRegions:
+          - eu-west-1
+          - us-west-1
   esbuild:
     bundle: true
     minify: false
