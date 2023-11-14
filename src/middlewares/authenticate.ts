@@ -8,9 +8,7 @@ import { MiddyEvent } from '../types/MiddyCustom';
 const JWT_SECRET = process.env.JWT_SECRET as Secret;
 
 export const authenticate = (): MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
-  const before: middy.MiddlewareFn<MiddyEvent, APIGatewayProxyResult> = (
-    { event },
-  ) => {
+  const before: middy.MiddlewareFn<MiddyEvent, APIGatewayProxyResult> = ({ event }) => {
     try {
       if (!event.headers.authorization) {
         throw new createHttpError.Unauthorized();

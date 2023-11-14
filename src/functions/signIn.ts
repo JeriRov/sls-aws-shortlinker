@@ -6,7 +6,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
-import { validateEmail } from '../helpers/validation';
+import {validateCredentials} from '../helpers/validation';
 import { TableNames } from '../helpers/tableNames';
 import { generateTokens } from '../helpers/auth';
 import { AuthRequest } from '../types/Auth';
@@ -18,13 +18,7 @@ const signInHandler = async (
   event: MiddyEvent<AuthRequest>,
 ): Promise<APIGatewayProxyResult> => {
   const { email, password } = event.body;
-  if (!email || !password) {
-    throw new createHttpError.Conflict('Email and password are required!');
-  }
-  if (!validateEmail(email)) {
-    throw new createHttpError.Conflict('Invalid email');
-  }
-
+  validateCredentials(email, password, true);
   const client = getDynamoDBClient();
   const getUserResults = await client.getItem({
     TableName: TableNames.USER,

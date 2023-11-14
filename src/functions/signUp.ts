@@ -6,7 +6,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
-import { validateEmail, validatePassword } from '../helpers/validation';
+import { validateCredentials } from '../helpers/validation';
 import { TableNames } from '../helpers/tableNames';
 import { generateTokens } from '../helpers/auth';
 import { AuthRequest } from '../types/Auth';
@@ -19,15 +19,7 @@ const signUpHandler = async (
   event: MiddyEvent<AuthRequest>,
 ): Promise<APIGatewayProxyResult> => {
   const { email, password } = event.body;
-  if (!email || !password) {
-    throw new createHttpError.Conflict('Email and password are required!');
-  }
-  if (!validateEmail(email)) {
-    throw new createHttpError.Conflict('Invalid email');
-  }
-  if (!validatePassword(password)) {
-    throw new createHttpError.Conflict('The password must contain a minimum of eight characters, at least one letter and one number');
-  }
+  validateCredentials(email, password);
   const client = getDynamoDBClient();
 
   const scanUsersResults = await client.scan({
