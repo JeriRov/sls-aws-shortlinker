@@ -56,4 +56,6 @@ const signInHandler = async (
 export const signIn = middy(signInHandler)
   .use(httpHeaderNormalizer())
   .use(jsonBodyParser())
-  .use(httpErrorHandler());
+  .use(httpErrorHandler({
+    fallbackMessage: 'Internal server error',
+  }));
