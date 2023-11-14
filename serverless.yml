@@ -65,6 +65,12 @@ functions:
       - httpApi:
           path: /auth/sign-in
           method: post
+  createShortUrl:
+    handler: handler.createShortUrl
+    events:
+      - httpApi:
+          path: /short-url
+          method: post
 
 resources:
   Resources:

@@ -23,3 +23,11 @@ export const validateCredentials = (email: string, password: string, avoidPasswo
     throw new createHttpError.Conflict('The password must contain a minimum of eight characters, at least one letter, and one number');
   }
 };
+
+export const validateUrl = (url: string) => {
+  try {
+    return Boolean(new URL(url));
+  } catch (e) {
+    return false;
+  }
+};
