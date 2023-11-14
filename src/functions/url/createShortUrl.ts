@@ -4,6 +4,7 @@ import jsonBodyParser from '@middy/http-json-body-parser';
 import httpHeaderNormalizer from '@middy/http-header-normalizer';
 import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
 import { authenticate } from '../../middlewares/authenticate';
 import { CreateLinkRequest, Link } from '../../types/Link';
@@ -35,12 +36,7 @@ const handler = async (
   const client = getDynamoDBClient();
   await client.putItem({
     TableName: TableNames.URL,
-    Item: {
-      id: { S: link.id },
-      originalUrl: { S: link.originalUrl },
-      shortUrl: { S: link.shortUrl },
-      userId: { S: link.userId },
-    },
+    Item: marshall(link),
   });
 
   return {
