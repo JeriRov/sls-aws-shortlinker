@@ -52,13 +52,13 @@ functions:
     handler: handler.signUp
     events:
       - httpApi:
-          path: /sign-up
+          path: /auth/sign-up
           method: post
   signIn:
     handler: handler.signIn
     events:
       - httpApi:
-          path: /sign-in
+          path: /auth/sign-in
           method: post
 
 resources:
