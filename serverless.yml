@@ -11,6 +11,7 @@ provider:
   environment:
     USER_TABLE_NAME: userTable
     URL_TABLE_NAME: urlTable
+    NODE_ENV: ${sls:stage}
 
 plugins:
   - serverless-dotenv-plugin
@@ -35,11 +36,10 @@ custom:
     stages:
       - dev
     start:
-      docker: true
+      noStart: true
       port: 8000
+      docker: true
       migrate: true
-      seed: true
-      convertEmptyValues: true
 
 functions:
   test:

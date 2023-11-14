@@ -12,3 +12,4 @@ jspm_packages
 .serverless
 .build
 .esbuild
+docker
