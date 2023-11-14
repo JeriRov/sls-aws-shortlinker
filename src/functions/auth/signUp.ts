@@ -6,6 +6,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
+import { marshall } from '@aws-sdk/util-dynamodb';
 import { validateCredentials } from '../../helpers/validation';
 import { TableNames } from '../../helpers/tableNames';
 import { generateTokens } from '../../libs/auth';
@@ -37,11 +38,11 @@ const signUpHandler = async (
   const userId = nanoid();
   await client.putItem({
     TableName: TableNames.USER,
-    Item: {
-      id: { S: userId },
-      email: { S: email },
-      password: { S: hashedPassword },
-    },
+    Item: marshall({
+      id: userId,
+      email,
+      password: hashedPassword,
+    }),
   });
 
   const tokensWithId = generateTokens({ id: userId, email });
