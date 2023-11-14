@@ -71,6 +71,12 @@ functions:
       - httpApi:
           path: /short-url
           method: post
+  redirectShortUrl:
+    handler: handler.redirectShortUrl
+    events:
+      - httpApi:
+          path: /{shortId}
+          method: get
 
 resources:
   Resources:
