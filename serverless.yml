@@ -8,50 +8,90 @@ useDotenv: true
 provider:
   name: aws
   runtime: nodejs18.x
+  environment:
+    USER_TABLE_NAME: userTable
+    URL_TABLE_NAME: urlTable
+    NODE_ENV: ${sls:stage}
 
 plugins:
   - serverless-esbuild
-  - serverless-create-global-dynamodb-table
-  - serverless-iam-roles-per-function
+  - serverless-dotenv-plugin
+  - serverless-dynamodb-global-table-v2-plugin
+  - serverless-dynamodb
   - serverless-offline
 
 custom:
-  globalTables:
-    version: v2
-    regions:
-      - eu-west-1
-    createStack: false
+  globalTablesV2:
+    primaryRegion: us-east-1
+    tables:
+      - table: UserTable
+        addRegions:
+          - eu-west-1
+          - us-west-1
+      - table: UrlTable
+        addRegions:
+          - eu-west-1
+          - us-west-1
   esbuild:
     bundle: true
     minify: false
     target: 'node18'
     platform: 'node'
+  serverless-dynamodb:
+    stages:
+      - dev
+    start:
+      noStart: true
+      port: 8000
+      docker: true
+      migrate: true
 
 functions:
-  api:
-    handler: index.hello
+  test:
+    handler: handler.test
     events:
       - httpApi:
           path: /
           method: get
+  signUp:
+    handler: handler.signUp
+    events:
+      - httpApi:
+          path: /auth/sign-up
+          method: post
+  signIn:
+    handler: handler.signIn
+    events:
+      - httpApi:
+          path: /auth/sign-in
+          method: post
 
 resources:
   Resources:
     UserTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: userTable
+        TableName: ${self:provider.environment.USER_TABLE_NAME}
         AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
           - AttributeName: email
             AttributeType: S
         KeySchema:
           - AttributeName: email
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: UserIndex
+            KeySchema:
+              - AttributeName: id
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
     UrlTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: urlTable
+        TableName: ${self:provider.environment.URL_TABLE_NAME}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S

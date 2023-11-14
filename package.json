@@ -5,7 +5,8 @@
   "scripts": {
     "build": "sls package",
     "deploy": "sls deploy",
-    "dev": "sls offline start --reloadHandler",
+    "dev": "docker-compose up -d & sls offline start --reloadHandler",
+    "lint": "eslint --fix src handler.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -16,14 +17,34 @@
   "author": "Artem Magei",
   "license": "ISC",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
     "esbuild": "^0.19.5",
-    "serverless-create-global-dynamodb-table": "^3.1.1",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-dynamodb-global-table-v2-plugin": "^1.2.2",
     "serverless-esbuild": "^1.48.5",
-    "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^13.2.1",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@types/node": "^20.9.0"
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/util-dynamodb": "^3.450.0",
+    "@middy/core": "^4.7.0",
+    "@middy/http-error-handler": "^4.7.0",
+    "@middy/http-header-normalizer": "^4.7.0",
+    "@middy/http-json-body-parser": "^4.7.0",
+    "@types/aws-lambda": "^8.10.126",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/http-errors": "^2.0.4",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.9.0",
+    "bcryptjs": "^2.4.3",
+    "http-errors": "^2.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nanoid": "^3.3.7",
+    "serverless-dynamodb": "^0.2.47"
   }
 }
