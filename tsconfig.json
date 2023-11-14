@@ -3,6 +3,7 @@
     "preserveConstEnums": true,
     "strictNullChecks": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "strict": true,

@@ -6,6 +6,7 @@
     "build": "sls package",
     "deploy": "sls deploy",
     "dev": "sls offline start --reloadHandler",
+    "lint": "eslint --fix src handler.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -16,7 +17,12 @@
   "author": "Artem Magei",
   "license": "ISC",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
     "esbuild": "^0.19.5",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-plugin-import": "^2.29.0",
     "serverless-create-global-dynamodb-table": "^3.1.1",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-esbuild": "^1.48.5",
@@ -26,6 +32,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/util-dynamodb": "^3.450.0",
     "@middy/core": "^4.7.0",
     "@middy/http-error-handler": "^4.7.0",
     "@middy/http-header-normalizer": "^4.7.0",
