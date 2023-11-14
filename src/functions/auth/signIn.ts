@@ -6,13 +6,13 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
-import { validateCredentials } from '../helpers/validation';
-import { TableNames } from '../helpers/tableNames';
-import { generateTokens } from '../helpers/auth';
-import { AuthRequest } from '../types/Auth';
-import { getDynamoDBClient } from '../helpers/providers';
-import { User } from '../types/User';
-import { MiddyEvent } from '../types/MiddyCustom';
+import { validateCredentials } from '../../helpers/validation';
+import { TableNames } from '../../helpers/tableNames';
+import { generateTokens } from '../../libs/auth';
+import { AuthRequest } from '../../types/Auth';
+import { getDynamoDBClient } from '../../helpers/providers';
+import { User } from '../../types/User';
+import { MiddyEvent } from '../../types/MiddyCustom';
 
 const signInHandler = async (
   event: MiddyEvent<AuthRequest>,

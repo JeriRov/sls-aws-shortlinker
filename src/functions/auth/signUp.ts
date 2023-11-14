@@ -6,12 +6,12 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
-import { validateCredentials } from '../helpers/validation';
-import { TableNames } from '../helpers/tableNames';
-import { generateTokens } from '../helpers/auth';
-import { AuthRequest } from '../types/Auth';
-import { getDynamoDBClient } from '../helpers/providers';
-import { MiddyEvent } from '../types/MiddyCustom';
+import { validateCredentials } from '../../helpers/validation';
+import { TableNames } from '../../helpers/tableNames';
+import { generateTokens } from '../../libs/auth';
+import { AuthRequest } from '../../types/Auth';
+import { getDynamoDBClient } from '../../helpers/providers';
+import { MiddyEvent } from '../../types/MiddyCustom';
 
 const SALT_ROUNDS = 12;
 
