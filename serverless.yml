@@ -8,43 +8,19 @@ useDotenv: true
 provider:
   name: aws
   runtime: nodejs18.x
+  region: us-east-1
   environment:
-    USER_TABLE_NAME: userTable
-    URL_TABLE_NAME: urlTable
     NODE_ENV: ${sls:stage}
+    URL_TABLE_NAME: ${self:service}-urlTable-${sls:stage}
+    USER_TABLE_NAME: ${self:service}-userTable-${sls:stage}
 
 plugins:
-  - serverless-esbuild
   - serverless-dotenv-plugin
+  - serverless-esbuild
+  - serverless-iam-roles-per-function
   - serverless-dynamodb-global-table-v2-plugin
   - serverless-dynamodb
   - serverless-offline
-
-custom:
-  globalTablesV2:
-    primaryRegion: us-east-1
-    tables:
-      - table: UserTable
-        addRegions:
-          - eu-west-1
-          - us-west-1
-      - table: UrlTable
-        addRegions:
-          - eu-west-1
-          - us-west-1
-  esbuild:
-    bundle: true
-    minify: false
-    target: 'node18'
-    platform: 'node'
-  serverless-dynamodb:
-    stages:
-      - dev
-    start:
-      noStart: true
-      port: 8000
-      docker: true
-      migrate: true
 
 functions:
   test:
@@ -59,24 +35,70 @@ functions:
       - httpApi:
           path: /auth/sign-up
           method: post
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'dynamodb:GetItem'
+          - 'dynamodb:PutItem'
+        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE_NAME}'
   signIn:
     handler: handler.signIn
     events:
       - httpApi:
           path: /auth/sign-in
           method: post
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'dynamodb:GetItem'
+        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE_NAME}'
   createShortUrl:
     handler: handler.createShortUrl
     events:
       - httpApi:
           path: /short-url
           method: post
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'dynamodb:PutItem'
+        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.URL_TABLE_NAME}'
   redirectShortUrl:
     handler: handler.redirectShortUrl
     events:
       - httpApi:
           path: /{shortId}
           method: get
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'dynamodb:GetItem'
+        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.URL_TABLE_NAME}'
+
+custom:
+  globalTablesV2:
+    primaryRegion: us-east-1
+    tables:
+      - table: UserTable
+        addRegions:
+          - eu-west-1
+      - table: UrlTable
+        addRegions:
+          - eu-west-1
+  esbuild:
+    bundle: true
+    minify: false
+    target: 'node18'
+    platform: 'node'
+  serverless-dynamodb:
+    stages:
+      - dev
+    start:
+      noStart: true
+      port: 8000
+      docker: true
+      migrate: true
+      seed: true
 
 resources:
   Resources:

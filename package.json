@@ -4,7 +4,7 @@
   "description": "Serverless API for shortening long links.",
   "scripts": {
     "build": "sls package",
-    "deploy": "sls deploy",
+    "deploy": "sls deploy --stage prod",
     "dev": "docker-compose up -d & sls offline start --reloadHandler",
     "lint": "eslint --fix src handler.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,6 +26,7 @@
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-dynamodb-global-table-v2-plugin": "^1.2.2",
     "serverless-esbuild": "^1.48.5",
+    "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^13.2.1",
     "typescript": "^5.2.2"
   },
