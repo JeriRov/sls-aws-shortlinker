@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { validateCredentials } from '../../helpers/validation';
-import { TableNames } from '../../helpers/tableNames';
+import {createResponse, TableNames} from '../../helpers/helpers';
 import { generateTokens } from '../../libs/auth';
 import { AuthRequest } from '../../types/Auth';
 import { getDynamoDBClient } from '../../helpers/providers';
@@ -23,14 +23,13 @@ const signUpHandler = async (
   validateCredentials(email, password);
   const client = getDynamoDBClient();
 
-  const scanUsersResults = await client.scan({
+  const getUsersResults = await client.getItem({
     TableName: TableNames.USER,
-    FilterExpression: 'email = :email',
-    ExpressionAttributeValues: {
-      ':email': { S: email },
-    },
+    Key: marshall({
+      email,
+    }),
   });
-  if (scanUsersResults.Items && scanUsersResults.Items.length > 0) {
+  if (getUsersResults.Item) {
     throw new createHttpError.Conflict('User with such email already exists');
   }
 
@@ -50,10 +49,10 @@ const signUpHandler = async (
     success: true,
     data: tokensWithId,
   };
-  return {
+  return createResponse({
     statusCode: 200,
     body: JSON.stringify(response),
-  };
+  });
 };
 
 export const signUp = middy(signUpHandler)

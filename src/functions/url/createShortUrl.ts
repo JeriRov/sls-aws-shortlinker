@@ -11,7 +11,7 @@ import { CreateLinkRequest, Link } from '../../types/Link';
 import { validateUrl } from '../../helpers/validation';
 import { createShortId } from '../../libs/url';
 import { getDynamoDBClient } from '../../helpers/providers';
-import { TableNames } from '../../helpers/tableNames';
+import { TableNames, createResponse } from '../../helpers/helpers';
 
 const handler = async (
   event: MiddyEvent<CreateLinkRequest>,
@@ -39,13 +39,13 @@ const handler = async (
     Item: marshall(link),
   });
 
-  return {
+  return createResponse({
     statusCode: 200,
     body: JSON.stringify({
       success: true,
       data: link,
     }),
-  };
+  });
 };
 
 export const createShortUrl = middy(handler)

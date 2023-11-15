@@ -1,8 +1,9 @@
 import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import { authenticate } from '../middlewares/authenticate';
+import { createResponse } from '../helpers/helpers';
 
-const testHandler = async (event: Event) => ({
+const testHandler = async (event: Event) => createResponse({
   statusCode: 200,
   body: JSON.stringify(
     {

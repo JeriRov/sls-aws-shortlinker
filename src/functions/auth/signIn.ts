@@ -7,7 +7,7 @@ import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
 import { validateCredentials } from '../../helpers/validation';
-import { TableNames } from '../../helpers/tableNames';
+import { TableNames, createResponse } from '../../helpers/helpers';
 import { generateTokens } from '../../libs/auth';
 import { AuthRequest } from '../../types/Auth';
 import { getDynamoDBClient } from '../../helpers/providers';
@@ -41,10 +41,10 @@ const signInHandler = async (
     success: true,
     data: tokensWithId,
   };
-  return {
+  return createResponse({
     statusCode: 200,
     body: JSON.stringify(response),
-  };
+  });
 };
 
 export const signIn = middy(signInHandler)

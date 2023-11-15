@@ -6,7 +6,7 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
 import { Link, RedirectLinkRequest } from '../../types/Link';
 import { getDynamoDBClient } from '../../helpers/providers';
-import { TableNames } from '../../helpers/tableNames';
+import { createResponse, TableNames } from '../../helpers/helpers';
 
 const handler = async (
   event: MiddyEvent<{}, RedirectLinkRequest>,
@@ -18,25 +18,25 @@ const handler = async (
   }
   const client = getDynamoDBClient();
 
-  const scanUrlResult = await client.getItem({
+  const getUrlResult = await client.getItem({
     TableName: TableNames.URL,
     Key: marshall({
       id: shortId,
     }),
   });
 
-  if (!scanUrlResult.Item) {
+  if (!getUrlResult.Item) {
     throw new createHttpError.NotFound('URL not found');
   }
-  const url = unmarshall(scanUrlResult.Item) as Link;
+  const url = unmarshall(getUrlResult.Item) as Link;
 
-  return {
+  return createResponse({
     statusCode: 301,
     headers: {
       Location: String(`${url.originalUrl}`),
     },
     body: '',
-  };
+  });
 };
 
 export const redirectShortUrl = middy(handler)
