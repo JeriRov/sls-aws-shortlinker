@@ -9,7 +9,7 @@ signUp:
         bodyType: AuthRequestBody
         responseData:
           200:
-            description: 'Returns access token, refresh token and user id.'
+            description: 'Returns access token, refresh token and user email.'
             bodyType: AuthResponseBody
           409:
             description: 'Validation error'
@@ -32,7 +32,7 @@ signIn:
         bodyType: AuthRequestBody
         responseData:
           200:
-            description: 'Returns access token, refresh token and user id.'
+            description: 'Returns access token, refresh token and user email.'
             bodyType: AuthResponseBody
           401:
             description: 'Password is incorrect.'
