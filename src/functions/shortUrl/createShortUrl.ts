@@ -35,6 +35,7 @@ const handler = async (
     userEmail: event.requestContext.authorizer?.lambda.email,
     expirationDays,
     visitCount: 0,
+    isActive: true,
   };
   const client = getDynamoDBClient();
 

@@ -6,6 +6,7 @@ export type ShortUrl = {
   visitCount: number;
   creationTime: number;
   expirationDays: ShortUrlExpirationDay;
+  isActive: boolean;
 };
 
 export enum ShortUrlExpirationDay {
