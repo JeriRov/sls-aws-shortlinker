@@ -1,0 +1,40 @@
+createShortUrl:
+  handler: handler.createShortUrl
+  events:
+    - httpApi:
+        path: /short-url
+        method: post
+        description: 'This endpoint allows you to create a short link.'
+        swaggerTags: [ Short-url ]
+        bodyType: CreateUrlRequestBody
+        responseData:
+          200:
+            description: 'Returns the id.'
+            bodyType: CreateUrlResponseBody
+          409:
+            description: 'Validation error'
+            bodyType: ErrorResponse
+        authorizer:
+          name: jwtAuthorizer
+          type: jwt
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:PutItem'
+      Resource: !GetAtt UrlTable.Arn
+
+redirectShortUrl:
+  handler: handler.redirectShortUrl
+  events:
+    - httpApi:
+        path: /{shortId}
+        method: get
+        description: 'This endpoint allows you to redirect to the original url.'
+        swaggerTags: [ Short-url ]
+        responseData:
+          301: 'Redirect to original url'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+      Resource: !GetAtt UrlTable.Arn

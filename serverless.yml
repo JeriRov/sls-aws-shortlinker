@@ -13,7 +13,12 @@ provider:
     NODE_ENV: ${sls:stage}
     URL_TABLE_NAME: ${self:service}-urlTable-${sls:stage}
     USER_TABLE_NAME: ${self:service}-userTable-${sls:stage}
-
+  httpApi:
+    authorizers:
+      jwtAuthorizer:
+        type: request
+        functionName: jwtAuthorizer
+        identitySource: [$request.header.Authorization]
 plugins:
   - serverless-dotenv-plugin
   - serverless-esbuild
@@ -32,6 +37,8 @@ functions:
   redirectShortUrl: ${file(src/functions/url/url.yml):redirectShortUrl}
 
 custom:
+  serverless-offline:
+    ignoreJWTSignature: true
   globalTablesV2:
     primaryRegion: us-east-1
     tables:
