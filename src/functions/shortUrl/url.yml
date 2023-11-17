@@ -37,16 +37,17 @@ redirectShortUrl:
     - Effect: Allow
       Action:
         - 'dynamodb:GetItem'
+        - 'dynamodb:UpdateItem'
       Resource: !GetAtt UrlTable.Arn
 
 deactivateShortUrl:
-  handler: handler.redirectShortUrl
+  handler: handler.deactivateShortUrl
   events:
     - httpApi:
-        path: /{shortId}
-        method: delete
+        path: /deactivate/{shortId}
+        method: put
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - 'dynamodb:DeleteItem'
+        - 'dynamodb:UpdateItem'
       Resource: !GetAtt UrlTable.Arn

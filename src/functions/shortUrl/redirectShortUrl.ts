@@ -14,7 +14,7 @@ const handler = async (
   const { shortId } = event.pathParameters;
 
   if (!shortId) {
-    throw new createHttpError.Conflict('shortId is required!');
+    throw new createHttpError.BadRequest('shortId is required!');
   }
 
   const client = getDynamoDBClient();
@@ -29,8 +29,11 @@ const handler = async (
   if (!getUrlResult.Item) {
     throw new createHttpError.NotFound('URL not found');
   }
-
   const url = unmarshall(getUrlResult.Item) as ShortUrl;
+
+  if (!url.isActive) {
+    throw new createHttpError.NotFound('The URL has expired');
+  }
 
   await client.updateItem({
     TableName: TableNames.URL,

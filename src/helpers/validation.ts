@@ -14,7 +14,7 @@ export const validatePassword = (password: string): boolean => {
 
 export const validateCredentials = (email: string, password: string, avoidPassword = false) => {
   if (!email || !password) {
-    throw new createHttpError.Conflict('Email and password are required!');
+    throw new createHttpError.BadRequest('Email and password are required!');
   }
 
   if (!validateEmail(email)) {
