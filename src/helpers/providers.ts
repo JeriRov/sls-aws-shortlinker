@@ -16,4 +16,5 @@ if (NODE_ENV === 'dev') {
     },
   };
 }
+
 export const getDynamoDBClient = () => new DynamoDB(config);

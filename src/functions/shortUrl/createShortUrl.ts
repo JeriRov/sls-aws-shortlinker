@@ -6,29 +6,28 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
-import { CreateUrlRequestBody, Url, UrlExpirationTime } from '../../types/Url';
+import { CreateShortUrlRequestBody, ShortUrl, ShortUrlExpirationDay } from '../../types/ShortUrl';
 import { validateUrl } from '../../helpers/validation';
 import { createShortId } from '../../libs/url';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { TableNames, createResponse } from '../../helpers/helpers';
 
 const handler = async (
-  event: MiddyEvent<CreateUrlRequestBody>,
+  event: MiddyEvent<CreateShortUrlRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { originalUrl, expirationDays } = event.body;
 
   if (!originalUrl) {
     throw new createHttpError.Conflict('originalUrl and expirationDays is required!');
   }
-  if (!(expirationDays in UrlExpirationTime)) {
+  if (!(expirationDays in ShortUrlExpirationDay)) {
     throw new createHttpError.Conflict('Invalid expirationTime value');
   }
   if (!validateUrl(originalUrl)) {
     throw new createHttpError.Conflict('Invalid URL format');
   }
-
   const shortId = createShortId();
-  const link: Url = {
+  const link: ShortUrl = {
     id: shortId,
     originalUrl,
     shortUrl: `${event.headers.host}/${shortId}`,
@@ -37,21 +36,19 @@ const handler = async (
     expirationDays,
     visitCount: 0,
   };
-
   const client = getDynamoDBClient();
+
   await client.putItem({
     TableName: TableNames.URL,
     Item: marshall(link),
   });
 
-  const responseBody = {
-    success: true,
-    data: { link },
-  };
-
   return createResponse({
     statusCode: 200,
-    body: JSON.stringify(responseBody),
+    body: {
+      success: true,
+      data: link,
+    },
   });
 };
 

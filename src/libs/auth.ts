@@ -4,6 +4,7 @@ import { User, UserWithoutPassword } from '../types/User';
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '1h';
 const JWT_SECRET = process.env.JWT_SECRET as Secret;
+
 export const generateTokens = (user: User | UserWithoutPassword): AuthTokensWithEmail => {
   const payload: UserWithoutPassword = {
     email: user.email,

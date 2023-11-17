@@ -9,7 +9,9 @@ import {
 import { AuthContext } from './types/Auth';
 
 const JWT_SECRET = process.env.JWT_SECRET as Secret;
+
 const UNAUTHORIZED = 'Unauthorized';
+
 const generatePolicy = (
   principalId: string,
   effect: string,
@@ -22,6 +24,7 @@ const generatePolicy = (
       Effect: effect,
       Resource: resource,
     };
+
     const authResponse: APIGatewayAuthorizerResult = {
       principalId,
       policyDocument: {
@@ -29,23 +32,28 @@ const generatePolicy = (
         Statement: [statementOne],
       },
     };
+
     return authResponse;
   }
+
   const statementOne: Statement = {
     Action: 'execute-api:Invoke',
     Effect: effect,
     Resource: resource,
   };
+
   const policyDocument: PolicyDocument = {
     Version: '2012-10-17',
     Statement: [statementOne],
   };
+
   const authResponse: APIGatewayAuthorizerWithContextResult<AuthContext> = {
     policyDocument,
     principalId,
     usageIdentifierKey: undefined,
     context,
   };
+
   return authResponse;
 };
 
@@ -61,6 +69,7 @@ export const authenticate = async (
   callback: Callback,
 ) => {
   const authHeader = event.headers?.Authorization ?? event.headers?.authorization;
+
   if (!authHeader) {
     return callback(UNAUTHORIZED);
   }
@@ -68,15 +77,19 @@ export const authenticate = async (
 
   try {
     const decode = jwt.decode(token, { complete: true });
+
     if (!decode) {
       return callback(null, generateDeny(token, event.routeArn));
     }
     const context: AuthContext = decode.payload as AuthContext;
+
     jwt.verify(token, JWT_SECRET);
+
     return generateAllow(context.email, event.routeArn, context);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Error verifying token', err);
+
     return callback(UNAUTHORIZED);
   }
 };

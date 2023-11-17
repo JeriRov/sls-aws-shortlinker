@@ -4,18 +4,19 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
-import { Url, RedirectUrlRequestParams } from '../../types/Url';
+import { ShortUrl, RedirectShortUrlRequestParams } from '../../types/ShortUrl';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { createResponse, TableNames } from '../../helpers/helpers';
 
 const handler = async (
-  event: MiddyEvent<{}, RedirectUrlRequestParams>,
+  event: MiddyEvent<{}, RedirectShortUrlRequestParams>,
 ): Promise<APIGatewayProxyResult> => {
   const { shortId } = event.pathParameters;
 
   if (!shortId) {
     throw new createHttpError.Conflict('shortId is required!');
   }
+
   const client = getDynamoDBClient();
 
   const getUrlResult = await client.getItem({
@@ -28,7 +29,8 @@ const handler = async (
   if (!getUrlResult.Item) {
     throw new createHttpError.NotFound('URL not found');
   }
-  const url = unmarshall(getUrlResult.Item) as Url;
+
+  const url = unmarshall(getUrlResult.Item) as ShortUrl;
 
   await client.updateItem({
     TableName: TableNames.URL,

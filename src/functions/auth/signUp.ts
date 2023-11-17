@@ -20,19 +20,19 @@ const signUpHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   const email = event.body.email.toLowerCase();
   const { password } = event.body;
+
   validateCredentials(email, password);
   const client = getDynamoDBClient();
-
   const getUsersResults = await client.getItem({
     TableName: TableNames.USER,
     Key: marshall({
       email,
     }),
   });
+
   if (getUsersResults.Item) {
     throw new createHttpError.Conflict('User with such email already exists');
   }
-
   const hashedPassword: string = bcrypt.hashSync(password, SALT_ROUNDS);
 
   await client.putItem({
@@ -42,15 +42,14 @@ const signUpHandler = async (
       password: hashedPassword,
     }),
   });
-
   const tokensWithId = generateTokens({ email });
-  const responseBody = {
-    success: true,
-    data: tokensWithId,
-  };
+
   return createResponse({
     statusCode: 200,
-    body: JSON.stringify(responseBody),
+    body: {
+      success: true,
+      data: tokensWithId,
+    },
   });
 };
 

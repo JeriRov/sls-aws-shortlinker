@@ -1,10 +1,17 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
-import { UserWithoutPassword } from './User';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { AuthTokensWithEmail } from './Auth';
 
 export type MiddyEvent<T = APIGatewayProxyEvent['body'], P = APIGatewayProxyEvent['pathParameters']> =
-    APIGatewayProxyEvent
-    & {
+    APIGatewayProxyEvent & {
       body: T,
-      pathParameters: P,
-      auth?: UserWithoutPassword | null
+      pathParameters: P
     };
+
+export type ResponseBody<T> = {
+  success: boolean,
+  data: AuthTokensWithEmail | T,
+};
+
+export interface MiddyResult<T> extends Omit<APIGatewayProxyResult, 'body'> {
+  body: ResponseBody<T> | string;
+}

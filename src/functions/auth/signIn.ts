@@ -9,7 +9,7 @@ import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
 import { validateCredentials } from '../../helpers/validation';
 import { TableNames, createResponse } from '../../helpers/helpers';
 import { generateTokens } from '../../libs/auth';
-import { AuthRequestBody } from '../../types/Auth';
+import { AuthRequestBody, AuthTokensWithEmail } from '../../types/Auth';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { User } from '../../types/User';
 import { MiddyEvent } from '../../types/MiddyCustom';
@@ -18,6 +18,7 @@ const signInHandler = async (
   event: MiddyEvent<AuthRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { email, password } = event.body;
+
   validateCredentials(email, password, true);
   const client = getDynamoDBClient();
   const getUserResults = await client.getItem({
@@ -26,24 +27,24 @@ const signInHandler = async (
       email,
     }),
   });
+
   if (!getUserResults.Item) {
     throw new createHttpError.NotFound('User not found');
   }
   const user = unmarshall(getUserResults.Item) as User;
-
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+
   if (!isPasswordCorrect) {
     throw new createHttpError.Unauthorized('Invalid password');
   }
+  const tokensWithEmail = generateTokens({ email: user.email });
 
-  const tokensWithId = generateTokens({ email: user.email });
-  const responseBody = {
-    success: true,
-    data: tokensWithId,
-  };
-  return createResponse({
+  return createResponse<AuthTokensWithEmail>({
     statusCode: 200,
-    body: JSON.stringify(responseBody),
+    body: {
+      success: true,
+      data: tokensWithEmail,
+    },
   });
 };
 

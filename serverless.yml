@@ -33,8 +33,9 @@ functions:
     handler: handler.authenticate
   signUp: ${file(src/functions/auth/auth.yml):signUp}
   signIn: ${file(src/functions/auth/auth.yml):signIn}
-  createShortUrl: ${file(src/functions/url/url.yml):createShortUrl}
-  redirectShortUrl: ${file(src/functions/url/url.yml):redirectShortUrl}
+  createShortUrl: ${file(src/functions/shortUrl/url.yml):createShortUrl}
+  redirectShortUrl: ${file(src/functions/shortUrl/url.yml):redirectShortUrl}
+  deactivateShortUrl: ${file(src/functions/shortUrl/url.yml):deactivateShortUrl}
 
 custom:
   serverless-offline:
