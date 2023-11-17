@@ -30,6 +30,17 @@ const handler = async (
   }
   const url = unmarshall(getUrlResult.Item) as Url;
 
+  await client.updateItem({
+    TableName: TableNames.URL,
+    Key: marshall({
+      id: url.id,
+    }),
+    UpdateExpression: 'ADD visitCount :amount',
+    ExpressionAttributeValues: {
+      ':amount': { N: '1' },
+    },
+  });
+
   return createResponse({
     statusCode: 301,
     headers: {
