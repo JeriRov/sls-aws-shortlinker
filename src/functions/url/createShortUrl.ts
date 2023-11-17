@@ -6,15 +6,14 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
-import { authenticate } from '../../middlewares/authenticate';
-import { CreateLinkRequest, Link } from '../../types/Link';
+import { CreateUrlRequestBody, Url } from '../../types/Url';
 import { validateUrl } from '../../helpers/validation';
 import { createShortId } from '../../libs/url';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { TableNames, createResponse } from '../../helpers/helpers';
 
 const handler = async (
-  event: MiddyEvent<CreateLinkRequest>,
+  event: MiddyEvent<CreateUrlRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { originalUrl } = event.body;
 
@@ -26,11 +25,11 @@ const handler = async (
   }
   const shortId = createShortId();
 
-  const link: Link = {
+  const link: Url = {
     id: shortId,
     originalUrl,
     shortUrl: `${event.headers.host}/${shortId}`,
-    userId: event.requestContext.authorizer?.jwt.claims.id,
+    userEmail: 'email',
   };
 
   const client = getDynamoDBClient();
@@ -39,18 +38,19 @@ const handler = async (
     Item: marshall(link),
   });
 
+  const responseBody = {
+    success: true,
+    data: { link, event },
+  };
+
   return createResponse({
     statusCode: 200,
-    body: JSON.stringify({
-      success: true,
-      data: link,
-    }),
+    body: JSON.stringify(responseBody),
   });
 };
 
 export const createShortUrl = middy(handler)
   .use(httpHeaderNormalizer())
-  .use(authenticate())
   .use(jsonBodyParser())
   .use(httpErrorHandler({
     fallbackMessage: 'Internal server error',

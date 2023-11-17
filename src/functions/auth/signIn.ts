@@ -9,13 +9,13 @@ import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
 import { validateCredentials } from '../../helpers/validation';
 import { TableNames, createResponse } from '../../helpers/helpers';
 import { generateTokens } from '../../libs/auth';
-import { AuthRequest } from '../../types/Auth';
+import { AuthRequestBody } from '../../types/Auth';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { User } from '../../types/User';
 import { MiddyEvent } from '../../types/MiddyCustom';
 
 const signInHandler = async (
-  event: MiddyEvent<AuthRequest>,
+  event: MiddyEvent<AuthRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { email, password } = event.body;
   validateCredentials(email, password, true);
@@ -36,14 +36,14 @@ const signInHandler = async (
     throw new createHttpError.Unauthorized('Invalid password');
   }
 
-  const tokensWithId = generateTokens({ id: user.id, email: user.email });
-  const response = {
+  const tokensWithId = generateTokens({ email: user.email });
+  const responseBody = {
     success: true,
     data: tokensWithId,
   };
   return createResponse({
     statusCode: 200,
-    body: JSON.stringify(response),
+    body: JSON.stringify(responseBody),
   });
 };
 

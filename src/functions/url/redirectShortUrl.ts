@@ -4,12 +4,12 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
-import { Link, RedirectLinkRequest } from '../../types/Link';
+import { Url, RedirectUrlRequestParams } from '../../types/Url';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { createResponse, TableNames } from '../../helpers/helpers';
 
 const handler = async (
-  event: MiddyEvent<{}, RedirectLinkRequest>,
+  event: MiddyEvent<{}, RedirectUrlRequestParams>,
 ): Promise<APIGatewayProxyResult> => {
   const { shortId } = event.pathParameters;
 
@@ -28,7 +28,7 @@ const handler = async (
   if (!getUrlResult.Item) {
     throw new createHttpError.NotFound('URL not found');
   }
-  const url = unmarshall(getUrlResult.Item) as Link;
+  const url = unmarshall(getUrlResult.Item) as Url;
 
   return createResponse({
     statusCode: 301,
