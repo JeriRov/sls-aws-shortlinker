@@ -3,11 +3,15 @@ export type AuthTokens = {
   refreshToken: string;
 };
 
-export type AuthTokensWithId = AuthTokens & {
-  id: string
+export type AuthTokensWithEmail = AuthTokens & {
+  email: string
 };
 
-export interface AuthRequest {
+export interface AuthRequestBody {
   email: string,
   password: string
 }
+
+export type AuthContext = {
+  email: string
+};
