@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Serverless API for shortening long links.",
   "scripts": {
-    "build": "sls package",
+    "build": "tsc & sls package",
     "deploy": "sls deploy --stage prod",
-    "dev": "docker-compose up -d & sls offline start --reloadHandler",
+    "dev": "docker-compose up -d & sls offline start --reloadHandler --ignoreJWTSignature",
+    "docs": "rmdir /s /q swagger & sls generate-swagger",
     "lint": "eslint --fix src handler.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,11 +24,12 @@
     "eslint": "^8.53.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-plugin-import": "^2.29.0",
+    "serverless-auto-swagger": "^2.12.0",
     "serverless-dotenv-plugin": "^6.0.0",
     "serverless-dynamodb-global-table-v2-plugin": "^1.2.2",
     "serverless-esbuild": "^1.48.5",
     "serverless-iam-roles-per-function": "^3.2.0",
-    "serverless-offline": "^13.2.1",
+    "serverless-offline": "^13.3.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
