@@ -24,57 +24,8 @@ plugins:
   - serverless-offline
 
 functions:
-  test:
-    handler: handler.test
-    events:
-      - httpApi:
-          path: /
-          method: get
-  signUp:
-    handler: handler.signUp
-    events:
-      - httpApi:
-          path: /auth/sign-up
-          method: post
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - 'dynamodb:GetItem'
-          - 'dynamodb:PutItem'
-        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE_NAME}'
-  signIn:
-    handler: handler.signIn
-    events:
-      - httpApi:
-          path: /auth/sign-in
-          method: post
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - 'dynamodb:GetItem'
-        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USER_TABLE_NAME}'
-  createShortUrl:
-    handler: handler.createShortUrl
-    events:
-      - httpApi:
-          path: /short-url
-          method: post
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - 'dynamodb:PutItem'
-        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.URL_TABLE_NAME}'
-  redirectShortUrl:
-    handler: handler.redirectShortUrl
-    events:
-      - httpApi:
-          path: /{shortId}
-          method: get
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - 'dynamodb:GetItem'
-        Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.URL_TABLE_NAME}'
+  jwtAuthorizer:
+    handler: handler.authenticate
   signUp: ${file(src/functions/auth/auth.yml):signUp}
   signIn: ${file(src/functions/auth/auth.yml):signIn}
   createShortUrl: ${file(src/functions/url/url.yml):createShortUrl}
@@ -117,21 +68,12 @@ resources:
       Properties:
         TableName: ${self:provider.environment.USER_TABLE_NAME}
         AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
           - AttributeName: email
             AttributeType: S
         KeySchema:
           - AttributeName: email
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: UserIndex
-            KeySchema:
-              - AttributeName: id
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
     UrlTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -139,7 +81,7 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: userId
+          - AttributeName: userEmail
             AttributeType: S
         KeySchema:
           - AttributeName: id
@@ -148,7 +90,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: UserIndex
             KeySchema:
-              - AttributeName: userId
+              - AttributeName: userEmail
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
