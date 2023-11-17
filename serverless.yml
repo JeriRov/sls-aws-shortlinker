@@ -17,6 +17,7 @@ provider:
 plugins:
   - serverless-dotenv-plugin
   - serverless-esbuild
+  - serverless-auto-swagger
   - serverless-iam-roles-per-function
   - serverless-dynamodb-global-table-v2-plugin
   - serverless-dynamodb
@@ -74,6 +75,10 @@ functions:
         Action:
           - 'dynamodb:GetItem'
         Resource: 'arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.URL_TABLE_NAME}'
+  signUp: ${file(src/functions/auth/auth.yml):signUp}
+  signIn: ${file(src/functions/auth/auth.yml):signIn}
+  createShortUrl: ${file(src/functions/url/url.yml):createShortUrl}
+  redirectShortUrl: ${file(src/functions/url/url.yml):redirectShortUrl}
 
 custom:
   globalTablesV2:
@@ -99,7 +104,12 @@ custom:
       docker: true
       migrate: true
       seed: true
-
+  autoswagger:
+    title: 'AWS Short Linker'
+    apiType: 'httpApi'
+    typefiles: ['./src/types/api-types.d.ts']
+    generateSwaggerOnDeploy: true
+    apiKeyHeaders: ['authorization']
 resources:
   Resources:
     UserTable:
