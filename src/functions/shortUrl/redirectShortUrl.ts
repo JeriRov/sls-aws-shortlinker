@@ -4,7 +4,7 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { MiddyEvent } from '../../types/MiddyCustom';
-import { ShortUrl, RedirectShortUrlRequestParams } from '../../types/ShortUrl';
+import { RedirectShortUrlRequestParams, ShortUrl, ShortUrlLifeTime } from '../../types/ShortUrl';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { createResponse, TableNames } from '../../helpers/helpers';
 
@@ -33,6 +33,18 @@ const handler = async (
 
   if (!url.isActive) {
     throw new createHttpError.NotFound('The URL has expired');
+  }
+  if (url.shortUrlLifeTime === ShortUrlLifeTime.ONE_TIME) {
+    await client.updateItem({
+      TableName: TableNames.URL,
+      Key: marshall({
+        id: url.id,
+      }),
+      UpdateExpression: 'set isActive = :isActive',
+      ExpressionAttributeValues: {
+        ':isActive': { BOOL: false },
+      },
+    });
   }
 
   await client.updateItem({

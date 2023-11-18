@@ -5,11 +5,11 @@ export type ShortUrl = {
   userEmail: string;
   visitCount: number;
   creationTime: number;
-  expirationDays: ShortUrlExpirationDay;
+  shortUrlLifeTime: ShortUrlLifeTime;
   isActive: boolean;
 };
 
-export enum ShortUrlExpirationDay {
+export enum ShortUrlLifeTime {
   ONE_TIME = 0,
   ONE_DAY = 1,
   THREE_DAYS = 3,
@@ -18,7 +18,7 @@ export enum ShortUrlExpirationDay {
 
 export type CreateShortUrlRequestBody = {
   originalUrl: string;
-  expirationDays: ShortUrlExpirationDay;
+  shortUrlLifeTime: ShortUrlLifeTime;
 };
 
 export type DeactivateShortUrlParams = {

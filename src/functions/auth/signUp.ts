@@ -15,7 +15,7 @@ import { MiddyEvent } from '../../types/MiddyCustom';
 
 const SALT_ROUNDS = 12;
 
-const signUpHandler = async (
+const handler = async (
   event: MiddyEvent<AuthRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const email = event.body.email.toLowerCase();
@@ -53,7 +53,7 @@ const signUpHandler = async (
   });
 };
 
-export const signUp = middy(signUpHandler)
+export const signUp = middy(handler)
   .use(httpHeaderNormalizer())
   .use(jsonBodyParser())
   .use(httpErrorHandler({

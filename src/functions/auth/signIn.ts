@@ -14,7 +14,7 @@ import { getDynamoDBClient } from '../../helpers/providers';
 import { User } from '../../types/User';
 import { MiddyEvent } from '../../types/MiddyCustom';
 
-const signInHandler = async (
+const handler = async (
   event: MiddyEvent<AuthRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { email, password } = event.body;
@@ -48,7 +48,7 @@ const signInHandler = async (
   });
 };
 
-export const signIn = middy(signInHandler)
+export const signIn = middy(handler)
   .use(httpHeaderNormalizer())
   .use(jsonBodyParser())
   .use(httpErrorHandler({

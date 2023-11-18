@@ -1,7 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import middy from '@middy/core';
-import jsonBodyParser from '@middy/http-json-body-parser';
-import httpHeaderNormalizer from '@middy/http-header-normalizer';
 import httpErrorHandler from '@middy/http-error-handler';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import createHttpError from 'http-errors';
@@ -60,8 +58,6 @@ const handler = async (
 };
 
 export const deactivateShortUrl = middy(handler)
-  .use(httpHeaderNormalizer())
-  .use(jsonBodyParser())
   .use(httpErrorHandler({
     fallbackMessage: 'Internal server error',
   }));
