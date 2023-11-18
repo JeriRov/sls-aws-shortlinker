@@ -7,8 +7,8 @@ export type MiddyEvent<T = APIGatewayProxyEvent['body'], P = APIGatewayProxyEven
       pathParameters: P
     };
 
-export type MiddyEventWithLambdaAuthorizer<T> =
-    APIGatewayProxyEventV2WithLambdaAuthorizer<AuthContext> & MiddyEvent<T>;
+export type MiddyEventWithLambdaAuthorizer<T, P> =
+    APIGatewayProxyEventV2WithLambdaAuthorizer<AuthContext> & MiddyEvent<T, P>;
 
 export type ResponseBody<T> = {
   success: boolean,

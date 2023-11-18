@@ -3,15 +3,16 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import createHttpError from 'http-errors';
-import { MiddyEvent } from '../../types/MiddyCustom';
+import { MiddyEventWithLambdaAuthorizer } from '../../types/MiddyCustom';
 import { DeactivateShortUrlParams, ShortUrl } from '../../types/ShortUrl';
 import { createResponse, TableNames } from '../../helpers/helpers';
 import { getDynamoDBClient } from '../../helpers/providers';
 
 const handler = async (
-  event: MiddyEvent<{}, DeactivateShortUrlParams>,
+  event: MiddyEventWithLambdaAuthorizer<{}, DeactivateShortUrlParams>,
 ): Promise<APIGatewayProxyResult> => {
   const { shortId } = event.pathParameters;
+  const { email } = event.requestContext.authorizer;
 
   if (!shortId) {
     throw new createHttpError.BadRequest('shortId is required!');
@@ -26,6 +27,11 @@ const handler = async (
 
   if (!getShortUrlResult.Item) {
     throw new createHttpError.NotFound('URL not found');
+  }
+  const url = unmarshall(getShortUrlResult.Item) as ShortUrl;
+
+  if (url.userEmail !== email) {
+    throw new createHttpError.Forbidden('You do not have permission to deactivate this URL');
   }
   if (!getShortUrlResult.Item.isActive) {
     throw new createHttpError.NotFound('The URL has already expired');
@@ -46,13 +52,13 @@ const handler = async (
   if (!updateShortUrlResult.Attributes) {
     throw new createHttpError.InternalServerError('Error updating short url');
   }
-  const url = unmarshall(updateShortUrlResult.Attributes) as ShortUrl;
+  const updateUrl = unmarshall(updateShortUrlResult.Attributes) as ShortUrl;
 
   return createResponse({
     statusCode: 200,
     body: {
       success: true,
-      data: url,
+      data: updateUrl,
     },
   });
 };
