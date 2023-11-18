@@ -1,11 +1,14 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { AuthTokensWithEmail } from './Auth';
+import { APIGatewayProxyEvent, APIGatewayProxyEventV2WithLambdaAuthorizer, APIGatewayProxyResult } from 'aws-lambda';
+import { AuthContext, AuthTokensWithEmail } from './Auth';
 
 export type MiddyEvent<T = APIGatewayProxyEvent['body'], P = APIGatewayProxyEvent['pathParameters']> =
     APIGatewayProxyEvent & {
       body: T,
       pathParameters: P
     };
+
+export type MiddyEventWithLambdaAuthorizer<T> =
+    APIGatewayProxyEventV2WithLambdaAuthorizer<AuthContext> & MiddyEvent<T>;
 
 export type ResponseBody<T> = {
   success: boolean,

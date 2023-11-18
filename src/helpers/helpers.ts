@@ -6,6 +6,10 @@ export const TableNames = Object.freeze({
   URL: process.env.URL_TABLE_NAME ?? '',
 });
 
+export const IndexNames = Object.freeze({
+  USER_EMAIL: process.env.USER_EMAIL_INDEX_NAME ?? '',
+});
+
 const DEFAULT_HEADERS = {
   'content-type': 'application/json',
 };

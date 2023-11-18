@@ -13,6 +13,7 @@ provider:
     NODE_ENV: ${sls:stage}
     URL_TABLE_NAME: ${self:service}-urlTable-${sls:stage}
     USER_TABLE_NAME: ${self:service}-userTable-${sls:stage}
+    USER_EMAIL_INDEX_NAME: userEmail
   httpApi:
     authorizers:
       jwtAuthorizer:
@@ -36,6 +37,7 @@ functions:
   createShortUrl: ${file(src/functions/shortUrl/url.yml):createShortUrl}
   redirectShortUrl: ${file(src/functions/shortUrl/url.yml):redirectShortUrl}
   deactivateShortUrl: ${file(src/functions/shortUrl/url.yml):deactivateShortUrl}
+  myShortUrls: ${file(src/functions/shortUrl/url.yml):myShortUrls}
 
 custom:
   serverless-offline:
@@ -96,7 +98,7 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-          - IndexName: UserIndex
+          - IndexName: ${self:provider.environment.USER_EMAIL_INDEX_NAME}
             KeySchema:
               - AttributeName: userEmail
                 KeyType: HASH

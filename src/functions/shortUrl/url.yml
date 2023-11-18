@@ -4,6 +4,8 @@ createShortUrl:
     - httpApi:
         path: /short-url
         method: post
+        authorizer:
+          name: jwtAuthorizer
         description: 'This endpoint allows you to create a short link.'
         swaggerTags: [ Short-url ]
         bodyType: CreateUrlRequestBody
@@ -14,12 +16,10 @@ createShortUrl:
           409:
             description: 'Validation error'
             bodyType: ErrorResponse
-        authorizer:
-          name: jwtAuthorizer
-          type: jwt
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - 'dynamodb:GetItem'
         - 'dynamodb:PutItem'
       Resource: !GetAtt UrlTable.Arn
 
@@ -46,8 +46,26 @@ deactivateShortUrl:
     - httpApi:
         path: /deactivate/{shortId}
         method: put
+        authorizer:
+          name: jwtAuthorizer
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - 'dynamodb:GetItem'
         - 'dynamodb:UpdateItem'
+      Resource: !GetAtt UrlTable.Arn
+
+myShortUrls:
+  handler: handler.myShortUrls
+  events:
+    - httpApi:
+        path: /my-short-urls
+        method: get
+        authorizer:
+          name: jwtAuthorizer
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:Query'
       Resource: !GetAtt UrlTable.Arn

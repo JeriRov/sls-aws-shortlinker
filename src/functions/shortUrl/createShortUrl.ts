@@ -5,15 +5,15 @@ import httpHeaderNormalizer from '@middy/http-header-normalizer';
 import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { MiddyEvent } from '../../types/MiddyCustom';
 import { CreateShortUrlRequestBody, ShortUrl, ShortUrlLifeTime } from '../../types/ShortUrl';
 import { validateUrl } from '../../helpers/validation';
 import { createShortId } from '../../libs/url';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { TableNames, createResponse } from '../../helpers/helpers';
+import { MiddyEventWithLambdaAuthorizer } from '../../types/MiddyCustom';
 
 const handler = async (
-  event: MiddyEvent<CreateShortUrlRequestBody>,
+  event: MiddyEventWithLambdaAuthorizer<CreateShortUrlRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { originalUrl, shortUrlLifeTime } = event.body;
 
@@ -24,7 +24,7 @@ const handler = async (
     .filter((value) => typeof value === 'number');
 
   if (!possibleValues.includes(shortUrlLifeTime)) {
-    throw new createHttpError.Conflict(`Invalid expirationTime value. Allowed: [${possibleValues.join(', ')}]`);
+    throw new createHttpError.Conflict(`Invalid shortUrlLifeTime value. Allowed: [${possibleValues.join(', ')}]`);
   }
   if (!validateUrl(originalUrl)) {
     throw new createHttpError.Conflict('Invalid URL format');
@@ -36,7 +36,7 @@ const handler = async (
     originalUrl,
     shortUrl: `${event.headers.host}/${shortId}`,
     creationTime: Date.now(),
-    userEmail: event.requestContext.authorizer?.lambda.email,
+    userEmail: event.requestContext.authorizer.lambda.email,
     shortUrlLifeTime,
     visitCount: 0,
     isActive: true,
