@@ -134,4 +134,7 @@ redirectShortUrl:
       Action:
         - 'dynamodb:GetItem'
         - 'dynamodb:UpdateItem'
-      Resource: !GetAtt UrlTable.Arn
+        - 'sqs:SendMessage'
+      Resource:
+        - !GetAtt UrlTable.Arn
+        - !GetAtt ShortUrlQueue.Arn

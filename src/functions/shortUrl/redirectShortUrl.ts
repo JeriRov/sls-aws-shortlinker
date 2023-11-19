@@ -7,6 +7,7 @@ import { MiddyEvent } from '../../types/MiddyCustom';
 import { RedirectShortUrlRequestParams, ShortUrl, ShortUrlLifeTime } from '../../types/ShortUrl';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { createResponse, TableNames } from '../../helpers/helpers';
+import { sendDeactivationMessage } from '../../libs/sendDeactivationMessage';
 
 const handler = async (
   event: MiddyEvent<{}, RedirectShortUrlRequestParams>,
@@ -45,6 +46,7 @@ const handler = async (
         ':isActive': { BOOL: false },
       },
     });
+    await sendDeactivationMessage(url.shortUrl, url.userEmail);
   }
 
   await client.updateItem({
