@@ -1,3 +1,9 @@
-export { signUp } from './src/functions/signUp';
-export { test } from './src/functions/test';
-export { signIn } from './src/functions/signIn';
+export { authenticate } from './src/authorizer';
+export { signUp } from './src/functions/auth/signUp';
+export { signIn } from './src/functions/auth/signIn';
+export { createShortUrl } from './src/functions/shortUrl/createShortUrl';
+export { redirectShortUrl } from './src/functions/shortUrl/redirectShortUrl';
+export { deactivateShortUrl } from './src/functions/shortUrl/deactivateShortUrl';
+export { myShortUrls } from './src/functions/shortUrl/myShortUrls';
+export { sendEmail } from './src/functions/notifications/sendEmail';
+export { emailVerifyOwner } from './src/hooks/emailVerifyOwner';

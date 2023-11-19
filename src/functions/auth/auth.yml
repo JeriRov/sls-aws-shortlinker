@@ -1,0 +1,52 @@
+signUp:
+  handler: handler.signUp
+  events:
+    - httpApi:
+        path: /auth/sign-up
+        method: post
+        description: 'This endpoint allows you to sign up.'
+        swaggerTags: [Auth]
+        bodyType: AuthRequestBody
+        responseData:
+          200:
+            description: 'Returns access token, refresh token and user email.'
+            bodyType: AuthResponseBody
+          409:
+            description: 'Validation error'
+            bodyType: ErrorResponse
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:PutItem'
+        - 'ses:ListIdentities'
+        - 'ses:VerifyEmailIdentity'
+      Resource: '*'
+
+signIn:
+  handler: handler.signIn
+  events:
+    - httpApi:
+        path: /auth/sign-in
+        method: post
+        description: 'This endpoint allows you to sign in.'
+        swaggerTags: [ Auth ]
+        bodyType: AuthRequestBody
+        responseData:
+          200:
+            description: 'Returns access token, refresh token and user email.'
+            bodyType: AuthResponseBody
+          401:
+            description: 'Password is incorrect.'
+            bodyType: ErrorResponse
+          404:
+            description: 'User not found.'
+            bodyType: ErrorResponse
+          409:
+            description: 'Validation error'
+            bodyType: ErrorResponse
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+      Resource: !GetAtt UserTable.Arn

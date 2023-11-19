@@ -1,0 +1,140 @@
+createShortUrl:
+  handler: handler.createShortUrl
+  events:
+    - httpApi:
+        path: /short-url
+        method: post
+        authorizer:
+          name: jwtAuthorizer
+        description: 'This endpoint allows you to create a short link. `shortUrlLifeTime:` [0 = one time url, 1 = one day, 3 = three days, 7 = seven days]'
+        swaggerTags: [ Short-url ]
+        headerParameters:
+          authorization:
+            required: true
+            type: string
+            description: 'Bearer token'
+        bodyType: CreateUrlRequestBody
+        responseData:
+          200:
+            description: 'Returns the created URL.'
+            bodyType: ShortUrlResponseBody
+          401:
+            description: 'Token expired.'
+            bodyType: InvalidTokenResponse
+          403:
+            description: 'Invalid token.'
+            bodyType: InvalidTokenResponse
+          409:
+            description: 'Validation error'
+            bodyType: ErrorResponse
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:PutItem'
+      Resource: !GetAtt UrlTable.Arn
+
+deactivateShortUrl:
+  handler: handler.deactivateShortUrl
+  events:
+    - httpApi:
+        path: /deactivate/{shortId}
+        method: put
+        authorizer:
+          name: jwtAuthorizer
+        description: 'This endpoint allows you to deactivate a short url.'
+        swaggerTags: [ Short-url ]
+        headerParameters:
+          authorization:
+            required: true
+            type: string
+            description: 'Bearer token'
+        responseData:
+          200:
+            description: 'Returns the updated URL.'
+            bodyType: ShortUrlResponseBody
+          400:
+            description: 'Path parameter not present.'
+            bodyType: ErrorResponse
+          401:
+            description: 'Token expired.'
+            bodyType: InvalidTokenResponse
+          403:
+            description: 'Invalid token or user do not have permission to deactivate URL.'
+            bodyType: InvalidTokenResponse
+          404:
+            description: 'Short url not found or already expired.'
+            bodyType: ErrorResponse
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:UpdateItem'
+        - 'sqs:SendMessage'
+        - 'ses:ListIdentities'
+        - 'ses:VerifyIdentity'
+        - 'ses:SendEmail'
+      Resource:
+      - !GetAtt UrlTable.Arn
+      - !GetAtt ShortUrlQueue.Arn
+
+myShortUrls:
+  handler: handler.myShortUrls
+  events:
+    - httpApi:
+        path: /my-short-urls
+        method: get
+        authorizer:
+          name: jwtAuthorizer
+        description: 'This endpoint allows you to get all user short links.'
+        swaggerTags: [ Short-url ]
+        headerParameters:
+          authorization:
+            required: true
+            type: string
+            description: 'Bearer token'
+        responseData:
+          200:
+            description: 'Returns the user short URLs.'
+            bodyType: MyUserResponseBody
+          401:
+            description: 'Token expired.'
+            bodyType: InvalidTokenResponse
+          403:
+            description: 'Invalid token.'
+            bodyType: InvalidTokenResponse
+          404:
+            description: 'User or short user URLs not found.'
+            bodyType: ErrorResponse
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:Query'
+      Resource: '*'
+
+redirectShortUrl:
+  handler: handler.redirectShortUrl
+  events:
+    - httpApi:
+        path: /{shortId}
+        method: get
+        description: 'This endpoint allows you to redirect to the original url.'
+        swaggerTags: [ Short-url ]
+        responseData:
+          301: 'Redirect to original url'
+          400:
+            description: 'Path parameter not present.'
+            bodyType: ErrorResponse
+          404:
+            description: 'Short url not found or expired.'
+            bodyType: ErrorResponse
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:UpdateItem'
+        - 'sqs:SendMessage'
+      Resource:
+        - !GetAtt UrlTable.Arn
+        - !GetAtt ShortUrlQueue.Arn

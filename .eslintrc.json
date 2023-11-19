@@ -17,7 +17,18 @@
     "import",
     "@typescript-eslint"
   ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src", "handler.ts"],
+        "extensions": [".ts", ".d.ts"]
+      }
+    }
+  },
+  "ignorePatterns": ["handler.ts"],
   "rules": {
+    "no-console": "off",
+    "implicit-arrow-linebreak": "off",
     "comma-dangle": 0,
     "no-underscore-dangle": 0,
     "no-param-reassign": 0,
@@ -25,6 +36,12 @@
     "camelcase": 0,
     "import/extensions": 0,
     "@typescript-eslint/no-redeclare": 0,
-    "import/prefer-default-export": "off"
+    "import/prefer-default-export": "off",
+    "newline-after-var": "error",
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "*", "next": "export" },
+      { "blankLine": "always", "prev": "*", "next": "return" }
+      ]
   }
 }

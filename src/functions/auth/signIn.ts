@@ -6,18 +6,19 @@ import httpErrorHandler from '@middy/http-error-handler';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { unmarshall, marshall } from '@aws-sdk/util-dynamodb';
-import { validateCredentials } from '../helpers/validation';
-import { TableNames } from '../helpers/tableNames';
-import { generateTokens } from '../helpers/auth';
-import { AuthRequest } from '../types/Auth';
-import { getDynamoDBClient } from '../helpers/providers';
-import { User } from '../types/User';
-import { MiddyEvent } from '../types/MiddyCustom';
+import { validateCredentials } from '../../helpers/validation';
+import { TableNames, createResponse } from '../../helpers/helpers';
+import { generateTokens } from '../../libs/auth';
+import { AuthRequestBody, AuthTokensWithEmail } from '../../types/Auth';
+import { getDynamoDBClient } from '../../helpers/providers';
+import { User } from '../../types/User';
+import { MiddyEvent } from '../../types/MiddyCustom';
 
-const signInHandler = async (
-  event: MiddyEvent<AuthRequest>,
+const handler = async (
+  event: MiddyEvent<AuthRequestBody>,
 ): Promise<APIGatewayProxyResult> => {
   const { email, password } = event.body;
+
   validateCredentials(email, password, true);
   const client = getDynamoDBClient();
   const getUserResults = await client.getItem({
@@ -26,28 +27,28 @@ const signInHandler = async (
       email,
     }),
   });
+
   if (!getUserResults.Item) {
     throw new createHttpError.NotFound('User not found');
   }
   const user = unmarshall(getUserResults.Item) as User;
-
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+
   if (!isPasswordCorrect) {
     throw new createHttpError.Unauthorized('Invalid password');
   }
+  const tokensWithEmail = generateTokens({ email: user.email });
 
-  const tokensWithId = generateTokens({ id: user.id, email: user.email });
-  const response = {
-    success: true,
-    data: tokensWithId,
-  };
-  return {
+  return createResponse<AuthTokensWithEmail>({
     statusCode: 200,
-    body: JSON.stringify(response),
-  };
+    body: {
+      success: true,
+      data: tokensWithEmail,
+    },
+  });
 };
 
-export const signIn = middy(signInHandler)
+export const signIn = middy(handler)
   .use(httpHeaderNormalizer())
   .use(jsonBodyParser())
   .use(httpErrorHandler({

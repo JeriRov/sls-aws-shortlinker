@@ -8,30 +8,64 @@ useDotenv: true
 provider:
   name: aws
   runtime: nodejs18.x
+  region: us-east-1
   environment:
-    USER_TABLE_NAME: userTable
-    URL_TABLE_NAME: urlTable
     NODE_ENV: ${sls:stage}
+    URL_TABLE_NAME: ${self:service}-urlTable-${sls:stage}
+    USER_TABLE_NAME: ${self:service}-userTable-${sls:stage}
+    QUEUE_NAME: ${self:service}-queue-${sls:stage}
+    USER_EMAIL_INDEX_NAME: userEmail
+    QUEUE_URL: https://sqs.${self:provider.region}.amazonaws.com/${aws:accountId}/${self:provider.environment.QUEUE_NAME}
+  httpApi:
+    authorizers:
+      jwtAuthorizer:
+        type: request
+        functionName: jwtAuthorizer
+        identitySource: [$request.header.Authorization]
 
 plugins:
-  - serverless-esbuild
   - serverless-dotenv-plugin
+  - serverless-esbuild
+  - serverless-auto-swagger
+  - serverless-iam-roles-per-function
   - serverless-dynamodb-global-table-v2-plugin
   - serverless-dynamodb
   - serverless-offline
+  - serverless-scriptable-plugin
+
+functions:
+  jwtAuthorizer:
+    handler: handler.authenticate
+  emailVerifyOwner:
+    handler: handler.emailVerifyOwner
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'ses:*'
+        Resource: '*'
+  signUp: ${file(src/functions/auth/auth.yml):signUp}
+  signIn: ${file(src/functions/auth/auth.yml):signIn}
+  createShortUrl: ${file(src/functions/shortUrl/url.yml):createShortUrl}
+  redirectShortUrl: ${file(src/functions/shortUrl/url.yml):redirectShortUrl}
+  deactivateShortUrl: ${file(src/functions/shortUrl/url.yml):deactivateShortUrl}
+  myShortUrls: ${file(src/functions/shortUrl/url.yml):myShortUrls}
+  sendEmail: ${file(src/functions/notifications/notifications.yml):sendEmail}
 
 custom:
+  scriptable:
+    hooks:
+      before:deploy:finalize: sls invoke --stage prod --function emailVerifyOwner
+  serverless-offline:
+    ignoreJWTSignature: true
   globalTablesV2:
     primaryRegion: us-east-1
     tables:
       - table: UserTable
         addRegions:
           - eu-west-1
-          - us-west-1
       - table: UrlTable
         addRegions:
           - eu-west-1
-          - us-west-1
   esbuild:
     bundle: true
     minify: false
@@ -45,49 +79,31 @@ custom:
       port: 8000
       docker: true
       migrate: true
-
-functions:
-  test:
-    handler: handler.test
-    events:
-      - httpApi:
-          path: /
-          method: get
-  signUp:
-    handler: handler.signUp
-    events:
-      - httpApi:
-          path: /auth/sign-up
-          method: post
-  signIn:
-    handler: handler.signIn
-    events:
-      - httpApi:
-          path: /auth/sign-in
-          method: post
+      seed: true
+  autoswagger:
+    title: 'AWS Short Linker'
+    apiType: 'httpApi'
+    typefiles: ['./src/types/Api.ts']
+    generateSwaggerOnDeploy: true
+    apiKeyHeaders: ['authorization']
 
 resources:
   Resources:
+    ShortUrlQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:provider.environment.QUEUE_NAME}
     UserTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.USER_TABLE_NAME}
         AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
           - AttributeName: email
             AttributeType: S
         KeySchema:
           - AttributeName: email
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: UserIndex
-            KeySchema:
-              - AttributeName: id
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
     UrlTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -95,16 +111,16 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: userId
+          - AttributeName: userEmail
             AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-          - IndexName: UserIndex
+          - IndexName: ${self:provider.environment.USER_EMAIL_INDEX_NAME}
             KeySchema:
-              - AttributeName: userId
+              - AttributeName: userEmail
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

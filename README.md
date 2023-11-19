@@ -12,6 +12,9 @@ the `npm run dev` or `sls offline` command, you need to have `docker` running. I
 need to familiarize yourself with [`serverless-dynamodb`](https://www.npmjs.com/package/serverless-dynamodb),otherwise
 you will not be able to use `npm run dev` or `sls offline`.
 
+Your email is needed to send messages from it to other users who will use your application. Be sure to go to your e-mail
+after deploy and go through the verification that Amazon will send you.
+
 For build
 
 - `npm run build`
