@@ -7,7 +7,7 @@ export const emailVerifyOwner = async () => {
 
     return '[emailVerifyOwner]: Message sent or already verified';
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return `[emailVerifyOwner]: Error while verifying email: ${error}`;
   }

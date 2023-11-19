@@ -21,9 +21,7 @@ signUp:
         - 'dynamodb:PutItem'
         - 'ses:ListIdentities'
         - 'ses:VerifyEmailIdentity'
-      Resource:
-        - !GetAtt UserTable.Arn
-        - "*"
+      Resource: '*'
 
 signIn:
   handler: handler.signIn

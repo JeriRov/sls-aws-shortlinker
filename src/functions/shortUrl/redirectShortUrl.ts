@@ -39,7 +39,7 @@ const handler = async (
     await client.updateItem({
       TableName: TableNames.URL,
       Key: marshall({
-        id: url.id,
+        id: shortId,
       }),
       UpdateExpression: 'set isActive = :isActive',
       ExpressionAttributeValues: {

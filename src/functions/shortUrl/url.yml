@@ -111,7 +111,7 @@ myShortUrls:
       Action:
         - 'dynamodb:GetItem'
         - 'dynamodb:Query'
-      Resource: !GetAtt UrlTable.Arn
+      Resource: '*'
 
 redirectShortUrl:
   handler: handler.redirectShortUrl

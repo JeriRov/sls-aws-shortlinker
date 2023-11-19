@@ -9,7 +9,6 @@ import {
 import { AuthContext } from './types/Auth';
 
 const JWT_SECRET = process.env.JWT_SECRET as Secret;
-
 const UNAUTHORIZED = 'Unauthorized';
 
 const generatePolicy = (
@@ -74,14 +73,12 @@ export const authenticate = async (
     return callback(UNAUTHORIZED);
   }
   try {
-    console.log('BeforeLink', authHeader);
     const token = authHeader.split(' ')[1];
 
     if (!token) {
       return callback(UNAUTHORIZED);
     }
 
-    console.log('token', token);
     const decode = jwt.decode(token, { complete: true });
 
     if (!decode) {

@@ -28,7 +28,6 @@ export const verifyEmail = async (email: string) => {
       new ListIdentitiesCommand({}),
     );
 
-    console.log('listIdentitiesResponse', listIdentitiesResponse);
     const verifiedEmails = listIdentitiesResponse.Identities ?? [];
 
     if (!verifiedEmails.includes(email)) {
