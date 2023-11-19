@@ -1,6 +1,9 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { MiddyResult } from '../types/MiddyCustom';
 
+export const EMAIL = process.env.EMAIL ?? '';
+export const QUEUE_URL = process.env.QUEUE_URL ?? '';
+
 export const TableNames = Object.freeze({
   USER: process.env.USER_TABLE_NAME ?? '',
   URL: process.env.URL_TABLE_NAME ?? '',

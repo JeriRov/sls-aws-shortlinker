@@ -13,13 +13,16 @@ provider:
     NODE_ENV: ${sls:stage}
     URL_TABLE_NAME: ${self:service}-urlTable-${sls:stage}
     USER_TABLE_NAME: ${self:service}-userTable-${sls:stage}
+    QUEUE_NAME: ${self:service}-queue-${sls:stage}
     USER_EMAIL_INDEX_NAME: userEmail
+    QUEUE_URL: https://sqs.${self:provider.region}.amazonaws.com/${aws:accountId}/${self:provider.environment.QUEUE_NAME}
   httpApi:
     authorizers:
       jwtAuthorizer:
         type: request
         functionName: jwtAuthorizer
         identitySource: [$request.header.Authorization]
+  iamManagedPolicies:
 plugins:
   - serverless-dotenv-plugin
   - serverless-esbuild
@@ -38,7 +41,21 @@ functions:
   redirectShortUrl: ${file(src/functions/shortUrl/url.yml):redirectShortUrl}
   deactivateShortUrl: ${file(src/functions/shortUrl/url.yml):deactivateShortUrl}
   myShortUrls: ${file(src/functions/shortUrl/url.yml):myShortUrls}
-
+  sendEmail:
+    handler: handler.sendEmail
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - ShortUrlQueue
+              - Arn
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'dynamodb:*'
+          - 'sqs:*'
+          - 'ses:*'
+        Resource: '*'
 custom:
   serverless-offline:
     ignoreJWTSignature: true
@@ -68,11 +85,15 @@ custom:
   autoswagger:
     title: 'AWS Short Linker'
     apiType: 'httpApi'
-    typefiles: ['./src/types/api-types.d.ts']
+    typefiles: ['./src/types/Api.ts']
     generateSwaggerOnDeploy: true
     apiKeyHeaders: ['authorization']
 resources:
   Resources:
+    ShortUrlQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:provider.environment.QUEUE_NAME}
     UserTable:
       Type: AWS::DynamoDB::Table
       Properties:

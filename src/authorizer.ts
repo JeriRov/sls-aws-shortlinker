@@ -73,9 +73,8 @@ export const authenticate = async (
   if (!authHeader) {
     return callback(UNAUTHORIZED);
   }
-  const token = authHeader.split(' ')[1];
-
   try {
+    const token = authHeader.split(' ')[1];
     const decode = jwt.decode(token, { complete: true });
 
     if (!decode) {
@@ -87,7 +86,6 @@ export const authenticate = async (
 
     return generateAllow(context.email, event.routeArn, context);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('Error verifying token', err);
 
     return callback(UNAUTHORIZED);

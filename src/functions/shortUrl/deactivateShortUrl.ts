@@ -7,12 +7,13 @@ import { MiddyEventWithLambdaAuthorizer } from '../../types/MiddyCustom';
 import { DeactivateShortUrlParams, ShortUrl } from '../../types/ShortUrl';
 import { createResponse, TableNames } from '../../helpers/helpers';
 import { getDynamoDBClient } from '../../helpers/providers';
+import { sendDeactivationMessage } from '../../libs/sendDeactivationMessage';
 
 const handler = async (
   event: MiddyEventWithLambdaAuthorizer<{}, DeactivateShortUrlParams>,
 ): Promise<APIGatewayProxyResult> => {
   const { shortId } = event.pathParameters;
-  const { email } = event.requestContext.authorizer;
+  const { email } = event.requestContext.authorizer.lambda;
 
   if (!shortId) {
     throw new createHttpError.BadRequest('shortId is required!');
@@ -33,7 +34,7 @@ const handler = async (
   if (url.userEmail !== email) {
     throw new createHttpError.Forbidden('You do not have permission to deactivate this URL');
   }
-  if (!getShortUrlResult.Item.isActive) {
+  if (!url.isActive) {
     throw new createHttpError.NotFound('The URL has already expired');
   }
 
@@ -53,6 +54,8 @@ const handler = async (
     throw new createHttpError.InternalServerError('Error updating short url');
   }
   const updateUrl = unmarshall(updateShortUrlResult.Attributes) as ShortUrl;
+
+  await sendDeactivationMessage(updateUrl.shortUrl, updateUrl.userEmail);
 
   return createResponse({
     statusCode: 200,

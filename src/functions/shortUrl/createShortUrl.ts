@@ -13,7 +13,7 @@ import { TableNames, createResponse } from '../../helpers/helpers';
 import { MiddyEventWithLambdaAuthorizer } from '../../types/MiddyCustom';
 
 const handler = async (
-  event: MiddyEventWithLambdaAuthorizer<CreateShortUrlRequestBody>,
+  event: MiddyEventWithLambdaAuthorizer<CreateShortUrlRequestBody, {}>,
 ): Promise<APIGatewayProxyResult> => {
   const { originalUrl, shortUrlLifeTime } = event.body;
 

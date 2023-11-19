@@ -27,6 +27,7 @@
   },
   "ignorePatterns": ["handler.ts"],
   "rules": {
+    "no-console": "off",
     "implicit-arrow-linebreak": "off",
     "comma-dangle": 0,
     "no-underscore-dangle": 0,

@@ -1,4 +1,6 @@
 import { DynamoDB, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb';
+import { SESClient } from '@aws-sdk/client-ses';
+import { SQSClient } from '@aws-sdk/client-sqs';
 
 const { AWS_REGION, NODE_ENV } = process.env;
 
@@ -18,3 +20,7 @@ if (NODE_ENV === 'dev') {
 }
 
 export const getDynamoDBClient = () => new DynamoDB(config);
+
+export const getSESClient = () => new SESClient({ region: process.env.AWS_REGION });
+
+export const getSQSClient = () => new SQSClient({ region: process.env.AWS_REGION });
