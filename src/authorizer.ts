@@ -74,7 +74,14 @@ export const authenticate = async (
     return callback(UNAUTHORIZED);
   }
   try {
+    console.log('BeforeLink', authHeader);
     const token = authHeader.split(' ')[1];
+
+    if (!token) {
+      return callback(UNAUTHORIZED);
+    }
+
+    console.log('token', token);
     const decode = jwt.decode(token, { complete: true });
 
     if (!decode) {
