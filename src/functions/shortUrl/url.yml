@@ -6,14 +6,14 @@ createShortUrl:
         method: post
         authorizer:
           name: jwtAuthorizer
-        description: 'This endpoint allows you to create a short link.'
+        description: 'This endpoint allows you to create a short link. `shortUrlLifeTime:` [0 = one time url, 1 = one day, 3 = three days, 7 = seven days]'
         swaggerTags: [ Short-url ]
-        bodyType: CreateUrlRequestBody
         headerParameters:
           authorization:
             required: true
             type: string
             description: 'Bearer token'
+        bodyType: CreateUrlRequestBody
         responseData:
           200:
             description: 'Returns the created URL.'

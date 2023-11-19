@@ -16,6 +16,7 @@ export type ErrorResponse = string;
 
 export type CreateUrlRequestBody = {
   originalUrl: string;
+  shortUrlLifeTime: number;
 };
 
 export type ShortUrlResponseBody = {

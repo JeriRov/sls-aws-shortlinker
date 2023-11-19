@@ -22,7 +22,7 @@ provider:
         type: request
         functionName: jwtAuthorizer
         identitySource: [$request.header.Authorization]
-  iamManagedPolicies:
+
 plugins:
   - serverless-dotenv-plugin
   - serverless-esbuild
@@ -52,10 +52,9 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - 'dynamodb:*'
-          - 'sqs:*'
           - 'ses:*'
         Resource: '*'
+
 custom:
   serverless-offline:
     ignoreJWTSignature: true
@@ -88,6 +87,7 @@ custom:
     typefiles: ['./src/types/Api.ts']
     generateSwaggerOnDeploy: true
     apiKeyHeaders: ['authorization']
+
 resources:
   Resources:
     ShortUrlQueue:
