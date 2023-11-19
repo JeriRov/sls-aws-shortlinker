@@ -1,0 +1,13 @@
+sendEmail:
+  handler: handler.sendEmail
+  events:
+    - sqs:
+        arn:
+          Fn::GetAtt:
+            - ShortUrlQueue
+            - Arn
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'ses:*'
+      Resource: '*'

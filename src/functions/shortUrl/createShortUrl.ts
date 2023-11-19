@@ -18,7 +18,7 @@ const handler = async (
   const { originalUrl, shortUrlLifeTime } = event.body;
 
   if (!originalUrl) {
-    throw new createHttpError.Conflict('originalUrl and expirationDays is required!');
+    throw new createHttpError.Conflict('originalUrl and shortUrlLifeTime is required!');
   }
   const possibleValues = Object.values(ShortUrlLifeTime)
     .filter((value) => typeof value === 'number');

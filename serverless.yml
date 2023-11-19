@@ -31,31 +31,30 @@ plugins:
   - serverless-dynamodb-global-table-v2-plugin
   - serverless-dynamodb
   - serverless-offline
+  - serverless-scriptable-plugin
 
 functions:
   jwtAuthorizer:
     handler: handler.authenticate
+  emailVerifyOwner:
+    handler: handler.emailVerifyOwner
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'ses:*'
+        Resource: '*'
   signUp: ${file(src/functions/auth/auth.yml):signUp}
   signIn: ${file(src/functions/auth/auth.yml):signIn}
   createShortUrl: ${file(src/functions/shortUrl/url.yml):createShortUrl}
   redirectShortUrl: ${file(src/functions/shortUrl/url.yml):redirectShortUrl}
   deactivateShortUrl: ${file(src/functions/shortUrl/url.yml):deactivateShortUrl}
   myShortUrls: ${file(src/functions/shortUrl/url.yml):myShortUrls}
-  sendEmail:
-    handler: handler.sendEmail
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - ShortUrlQueue
-              - Arn
-    iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - 'ses:*'
-        Resource: '*'
+  sendEmail: ${file(src/functions/notifications/notifications.yml):sendEmail}
 
 custom:
+  scriptable:
+    hooks:
+      before:deploy:finalize: sls invoke --stage prod --function emailVerifyOwner
   serverless-offline:
     ignoreJWTSignature: true
   globalTablesV2:

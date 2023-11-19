@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Serverless API for shortening long links.",
   "scripts": {
-    "build": "tsc & sls package",
+    "build": "sls package",
+    "build:tsc": "tsc & sls package",
     "deploy": "sls deploy --stage prod",
     "dev": "docker-compose up -d & sls offline start --reloadHandler --ignoreJWTSignature",
-    "docs": "rmdir /s /q swagger & sls generate-swagger",
+    "docs:win": "rmdir /s /q swagger & sls generate-swagger",
+    "docs:mac": "rm -rf swagger && sls generate-swagger",
     "lint": "eslint --fix src handler.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -30,6 +32,7 @@
     "serverless-esbuild": "^1.48.5",
     "serverless-iam-roles-per-function": "^3.2.0",
     "serverless-offline": "^13.3.0",
+    "serverless-scriptable-plugin": "^1.3.1",
     "typescript": "^5.2.2"
   },
   "dependencies": {
@@ -50,6 +53,7 @@
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^3.3.7",
+    "serverless": "^3.37.0",
     "serverless-dynamodb": "^0.2.47"
   }
 }

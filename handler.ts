@@ -6,3 +6,4 @@ export { redirectShortUrl } from './src/functions/shortUrl/redirectShortUrl';
 export { deactivateShortUrl } from './src/functions/shortUrl/deactivateShortUrl';
 export { myShortUrls } from './src/functions/shortUrl/myShortUrls';
 export { sendEmail } from './src/functions/notifications/sendEmail';
+export { emailVerifyOwner } from './src/hooks/emailVerifyOwner';
