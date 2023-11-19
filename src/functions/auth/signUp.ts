@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { validateCredentials } from '../../helpers/validation';
 import { createResponse, TableNames } from '../../helpers/helpers';
-import { generateTokens } from '../../libs/auth';
+import { generateTokens, verifyEmail } from '../../libs/auth';
 import { AuthRequestBody } from '../../types/Auth';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { MiddyEvent } from '../../types/MiddyCustom';
@@ -42,6 +42,7 @@ const handler = async (
       password: hashedPassword,
     }),
   });
+  await verifyEmail(email);
   const tokensWithId = generateTokens({ email });
 
   return createResponse({
