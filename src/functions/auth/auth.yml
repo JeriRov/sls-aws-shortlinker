@@ -19,7 +19,11 @@ signUp:
       Action:
         - 'dynamodb:GetItem'
         - 'dynamodb:PutItem'
-      Resource: !GetAtt UserTable.Arn
+        - 'ses:ListIdentities'
+        - 'ses:VerifyEmailIdentity'
+      Resource:
+        - !GetAtt UserTable.Arn
+        - "*"
 
 signIn:
   handler: handler.signIn
