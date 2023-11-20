@@ -8,6 +8,7 @@ import { DeactivateShortUrlParams, ShortUrl } from '../../types/ShortUrl';
 import { createResponse, TableNames } from '../../helpers/helpers';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { sendDeactivationMessage } from '../../libs/sendDeactivationMessage';
+import { deactivateShortUrlById } from '../../libs/shortUrl';
 
 const handler = async (
   event: MiddyEventWithLambdaAuthorizer<{}, DeactivateShortUrlParams>,
@@ -38,17 +39,7 @@ const handler = async (
     throw new createHttpError.NotFound('The URL has already expired');
   }
 
-  const updateShortUrlResult = await client.updateItem({
-    TableName: TableNames.URL,
-    Key: marshall({
-      id: shortId,
-    }),
-    UpdateExpression: 'set isActive = :isActive',
-    ExpressionAttributeValues: {
-      ':isActive': { BOOL: false },
-    },
-    ReturnValues: 'ALL_NEW',
-  });
+  const updateShortUrlResult = await deactivateShortUrlById(url.id);
 
   if (!updateShortUrlResult.Attributes) {
     throw new createHttpError.InternalServerError('Error updating short url');

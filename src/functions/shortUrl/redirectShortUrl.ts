@@ -8,6 +8,7 @@ import { RedirectShortUrlRequestParams, ShortUrl, ShortUrlLifeTime } from '../..
 import { getDynamoDBClient } from '../../helpers/providers';
 import { createResponse, TableNames } from '../../helpers/helpers';
 import { sendDeactivationMessage } from '../../libs/sendDeactivationMessage';
+import { deactivateShortUrlById } from '../../libs/shortUrl';
 
 const handler = async (
   event: MiddyEvent<{}, RedirectShortUrlRequestParams>,
@@ -36,16 +37,7 @@ const handler = async (
     throw new createHttpError.NotFound('The URL has expired');
   }
   if (url.shortUrlLifeTime === ShortUrlLifeTime.ONE_TIME) {
-    await client.updateItem({
-      TableName: TableNames.URL,
-      Key: marshall({
-        id: shortId,
-      }),
-      UpdateExpression: 'set isActive = :isActive',
-      ExpressionAttributeValues: {
-        ':isActive': { BOOL: false },
-      },
-    });
+    await deactivateShortUrlById(url.id);
     await sendDeactivationMessage(url.shortUrl, url.userEmail);
   }
 
