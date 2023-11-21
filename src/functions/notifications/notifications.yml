@@ -11,3 +11,20 @@ sendEmail:
       Action:
         - 'ses:*'
       Resource: '*'
+
+scheduledDeactivateShortUrl:
+  handler: handler.scheduledDeactivateShortUrl
+  events:
+    - eventBridge:
+        eventBus: default
+        pattern:
+          source:
+            - 'deactivation'
+          detail-type:
+            - 'trigger'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'dynamodb:UpdateItem'
+        - 'sqs:SendMessage'
+      Resource: '*'

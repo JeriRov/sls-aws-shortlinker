@@ -5,6 +5,9 @@ frameworkVersion: '3'
 
 useDotenv: true
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -16,12 +19,15 @@ provider:
     QUEUE_NAME: ${self:service}-queue-${sls:stage}
     USER_EMAIL_INDEX_NAME: userEmail
     QUEUE_URL: https://sqs.${self:provider.region}.amazonaws.com/${aws:accountId}/${self:provider.environment.QUEUE_NAME}
+    EVENT_BRIDGE_RULE_NAME: shortUrl
+    EVENT_BRIDGE_RULE_ARN: arn:aws:events:${self:provider.region}:${aws:accountId}:rule/${self:provider.environment.EVENT_BRIDGE_RULE_NAME}-*
+    DEACTIVATE_SHORT_URL_FUNCTION_ARN: arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${sls:stage}-scheduledDeactivateShortUrl
   httpApi:
     authorizers:
       jwtAuthorizer:
         type: request
         functionName: jwtAuthorizer
-        identitySource: [$request.header.Authorization]
+        identitySource: [ $request.header.Authorization ]
 
 plugins:
   - serverless-dotenv-plugin
@@ -29,9 +35,9 @@ plugins:
   - serverless-auto-swagger
   - serverless-iam-roles-per-function
   - serverless-dynamodb-global-table-v2-plugin
+  - serverless-scriptable-plugin
   - serverless-dynamodb
   - serverless-offline
-  - serverless-scriptable-plugin
 
 functions:
   jwtAuthorizer:
@@ -45,11 +51,12 @@ functions:
         Resource: '*'
   signUp: ${file(src/functions/auth/auth.yml):signUp}
   signIn: ${file(src/functions/auth/auth.yml):signIn}
-  createShortUrl: ${file(src/functions/shortUrl/url.yml):createShortUrl}
-  redirectShortUrl: ${file(src/functions/shortUrl/url.yml):redirectShortUrl}
-  deactivateShortUrl: ${file(src/functions/shortUrl/url.yml):deactivateShortUrl}
-  myShortUrls: ${file(src/functions/shortUrl/url.yml):myShortUrls}
+  createShortUrl: ${file(src/functions/shortUrl/shortUrl.yml):createShortUrl}
+  redirectShortUrl: ${file(src/functions/shortUrl/shortUrl.yml):redirectShortUrl}
+  deactivateShortUrl: ${file(src/functions/shortUrl/shortUrl.yml):deactivateShortUrl}
+  myShortUrls: ${file(src/functions/shortUrl/shortUrl.yml):myShortUrls}
   sendEmail: ${file(src/functions/notifications/notifications.yml):sendEmail}
+  scheduledDeactivateShortUrl: ${file(src/functions/notifications/notifications.yml):scheduledDeactivateShortUrl}
 
 custom:
   scriptable:
@@ -83,9 +90,9 @@ custom:
   autoswagger:
     title: 'AWS Short Linker'
     apiType: 'httpApi'
-    typefiles: ['./src/types/Api.ts']
+    typefiles: [ './src/types/Api.ts' ]
     generateSwaggerOnDeploy: true
-    apiKeyHeaders: ['authorization']
+    apiKeyHeaders: [ 'authorization' ]
 
 resources:
   Resources:
@@ -93,6 +100,15 @@ resources:
       Type: "AWS::SQS::Queue"
       Properties:
         QueueName: ${self:provider.environment.QUEUE_NAME}
+
+    ScheduledDeactivateShortUrlPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        FunctionName: ${self:provider.environment.DEACTIVATE_SHORT_URL_FUNCTION_ARN}
+        Action: 'lambda:InvokeFunction'
+        Principal: 'events.amazonaws.com'
+        SourceArn: ${self:provider.environment.EVENT_BRIDGE_RULE_ARN}
+
     UserTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -104,6 +120,7 @@ resources:
           - AttributeName: email
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
     UrlTable:
       Type: AWS::DynamoDB::Table
       Properties:

@@ -7,10 +7,11 @@ import createHttpError from 'http-errors';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { CreateShortUrlRequestBody, ShortUrl, ShortUrlLifeTime } from '../../types/ShortUrl';
 import { validateUrl } from '../../helpers/validation';
-import { createShortId } from '../../libs/url';
 import { getDynamoDBClient } from '../../helpers/providers';
 import { TableNames, createResponse } from '../../helpers/helpers';
 import { MiddyEventWithLambdaAuthorizer } from '../../types/MiddyCustom';
+import { createShortId } from '../../libs/shortUrl';
+import { addScheduledDeactivateShortUrl } from '../../libs/notifications';
 
 const handler = async (
   event: MiddyEventWithLambdaAuthorizer<CreateShortUrlRequestBody, {}>,
@@ -29,12 +30,12 @@ const handler = async (
   if (!validateUrl(originalUrl)) {
     throw new createHttpError.Conflict('Invalid URL format');
   }
-
   const shortId = createShortId();
-  const link: ShortUrl = {
+  const formattedShortUrl = `${event.headers['x-forwarded-proto']}://${event.headers.host}/${shortId}`;
+  const shortUrlValue: ShortUrl = {
     id: shortId,
     originalUrl,
-    shortUrl: `${event.headers.host}/${shortId}`,
+    shortUrl: formattedShortUrl,
     creationTime: Date.now(),
     userEmail: event.requestContext.authorizer.lambda.email,
     shortUrlLifeTime,
@@ -45,14 +46,26 @@ const handler = async (
 
   await client.putItem({
     TableName: TableNames.URL,
-    Item: marshall(link),
+    Item: marshall(shortUrlValue),
   });
+
+  if (shortUrlLifeTime !== ShortUrlLifeTime.ONE_TIME) {
+    const expireDate = new Date(shortUrlValue.creationTime);
+
+    expireDate.setDate(expireDate.getDate() + shortUrlLifeTime);
+    console.log('expire date', expireDate);
+
+    await addScheduledDeactivateShortUrl({
+      expireDate,
+      shortUrl: shortUrlValue,
+    });
+  }
 
   return createResponse({
     statusCode: 200,
     body: {
       success: true,
-      data: link,
+      data: shortUrlValue,
     },
   });
 };

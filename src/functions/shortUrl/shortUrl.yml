@@ -32,7 +32,10 @@ createShortUrl:
       Action:
         - 'dynamodb:GetItem'
         - 'dynamodb:PutItem'
-      Resource: !GetAtt UrlTable.Arn
+        - 'events:PutRule'
+        - 'events:PutTargets'
+        - 'events:PutEvents'
+      Resource: '*'
 
 deactivateShortUrl:
   handler: handler.deactivateShortUrl
