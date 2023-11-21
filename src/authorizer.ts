@@ -1,11 +1,13 @@
 import {
-  APIGatewayAuthorizerResult, Callback, Context, PolicyDocument, Statement,
-} from 'aws-lambda';
-import jwt, { Secret } from 'jsonwebtoken';
-import {
+  APIGatewayAuthorizerResult,
   APIGatewayAuthorizerWithContextResult,
   APIGatewayRequestAuthorizerEventV2,
-} from 'aws-lambda/trigger/api-gateway-authorizer';
+  Callback,
+  Context,
+  PolicyDocument,
+  Statement,
+} from 'aws-lambda';
+import jwt, { Secret } from 'jsonwebtoken';
 import { AuthContext } from './types/Auth';
 
 const JWT_SECRET = process.env.JWT_SECRET as Secret;
