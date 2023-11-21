@@ -35,9 +35,9 @@ plugins:
   - serverless-auto-swagger
   - serverless-iam-roles-per-function
   - serverless-dynamodb-global-table-v2-plugin
+  - serverless-scriptable-plugin
   - serverless-dynamodb
   - serverless-offline
-  - serverless-scriptable-plugin
 
 functions:
   jwtAuthorizer:
@@ -75,7 +75,7 @@ custom:
           - eu-west-1
   esbuild:
     bundle: true
-    minify: true
+    minify: false
     target: 'node18'
     platform: 'node'
   serverless-dynamodb:
