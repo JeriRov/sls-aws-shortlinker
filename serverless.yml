@@ -5,6 +5,9 @@ frameworkVersion: '3'
 
 useDotenv: true
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -72,7 +75,7 @@ custom:
           - eu-west-1
   esbuild:
     bundle: true
-    minify: false
+    minify: true
     target: 'node18'
     platform: 'node'
   serverless-dynamodb:
