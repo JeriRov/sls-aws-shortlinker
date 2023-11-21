@@ -27,7 +27,7 @@ provider:
       jwtAuthorizer:
         type: request
         functionName: jwtAuthorizer
-        identitySource: [$request.header.Authorization]
+        identitySource: [ $request.header.Authorization ]
 
 plugins:
   - serverless-dotenv-plugin
@@ -90,9 +90,9 @@ custom:
   autoswagger:
     title: 'AWS Short Linker'
     apiType: 'httpApi'
-    typefiles: ['./src/types/Api.ts']
+    typefiles: [ './src/types/Api.ts' ]
     generateSwaggerOnDeploy: true
-    apiKeyHeaders: ['authorization']
+    apiKeyHeaders: [ 'authorization' ]
 
 resources:
   Resources:
