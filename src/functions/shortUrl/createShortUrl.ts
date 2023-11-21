@@ -31,11 +31,11 @@ const handler = async (
     throw new createHttpError.Conflict('Invalid URL format');
   }
   const shortId = createShortId();
-
-  const shortUrl: ShortUrl = {
+  const formattedShortUrl = `${event.headers['x-forwarded-proto']}://${event.headers.host}/${shortId}`;
+  const shortUrlValue: ShortUrl = {
     id: shortId,
     originalUrl,
-    shortUrl: `${event.headers['x-forwarded-proto']}://${event.headers.host}/${shortId}`,
+    shortUrl: formattedShortUrl,
     creationTime: Date.now(),
     userEmail: event.requestContext.authorizer.lambda.email,
     shortUrlLifeTime,
@@ -46,18 +46,18 @@ const handler = async (
 
   await client.putItem({
     TableName: TableNames.URL,
-    Item: marshall(shortUrl),
+    Item: marshall(shortUrlValue),
   });
 
   if (shortUrlLifeTime !== ShortUrlLifeTime.ONE_TIME) {
-    const expireDate = new Date(shortUrl.creationTime);
+    const expireDate = new Date(shortUrlValue.creationTime);
 
     expireDate.setDate(expireDate.getDate() + shortUrlLifeTime);
     console.log('expire date', expireDate);
 
     await addScheduledDeactivateShortUrl({
       expireDate,
-      shortUrl,
+      shortUrl: shortUrlValue,
     });
   }
 
@@ -65,7 +65,7 @@ const handler = async (
     statusCode: 200,
     body: {
       success: true,
-      data: shortUrl,
+      data: shortUrlValue,
     },
   });
 };
