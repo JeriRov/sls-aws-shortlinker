@@ -10,8 +10,11 @@ export const scheduledDeactivateShortUrl = async ({
     console.log('schedule event', shortUrl, expireDate);
     console.log('date now', new Date());
 
-    await deactivateShortUrlById(shortUrl.id);
-    await sendDeactivationMessage(shortUrl.shortUrl, shortUrl.userEmail);
+    await Promise.all([
+      deactivateShortUrlById(shortUrl.id),
+      sendDeactivationMessage(shortUrl.shortUrl, shortUrl.userEmail),
+    ]);
+
     console.log(`URL ${shortUrl.shortUrl} deactivated`);
   } catch (error) {
     console.error(`Error while deactivate short URL with id ${shortUrl.id}. Error: ${error}`);
