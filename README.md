@@ -1,6 +1,7 @@
 # AWS Short Linker
 
 This is an API for a link shortener that uses AWS lambdas.
+OpenAPI Specs - https://il641p9a9j.execute-api.us-east-1.amazonaws.com/swagger
 
 * [How to run](#how-to-run)
     * [For build](#for-build)
