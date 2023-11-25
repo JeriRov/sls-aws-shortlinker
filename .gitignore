@@ -3,6 +3,14 @@
 
 # Node modules
 node_modules
+jspm_packages
 
 # Environment variables
 .env
+
+# Build folders
+.serverless
+.build
+.esbuild
+docker
+swagger

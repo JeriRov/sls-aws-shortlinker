@@ -1,0 +1,143 @@
+org: artemmagej
+app: sls-shortlinker-app
+service: shortlinker-http-api
+frameworkVersion: '3'
+
+useDotenv: true
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    NODE_ENV: ${sls:stage}
+    URL_TABLE_NAME: ${self:service}-urlTable-${sls:stage}
+    USER_TABLE_NAME: ${self:service}-userTable-${sls:stage}
+    QUEUE_NAME: ${self:service}-queue-${sls:stage}
+    USER_EMAIL_INDEX_NAME: userEmail
+    QUEUE_URL: https://sqs.${self:provider.region}.amazonaws.com/${aws:accountId}/${self:provider.environment.QUEUE_NAME}
+    EVENT_BRIDGE_RULE_NAME: shortUrl
+    EVENT_BRIDGE_RULE_ARN: arn:aws:events:${self:provider.region}:${aws:accountId}:rule/${self:provider.environment.EVENT_BRIDGE_RULE_NAME}-*
+    DEACTIVATE_SHORT_URL_FUNCTION_ARN: arn:aws:lambda:${self:provider.region}:${aws:accountId}:function:${self:service}-${sls:stage}-scheduledDeactivateShortUrl
+  httpApi:
+    authorizers:
+      jwtAuthorizer:
+        type: request
+        functionName: jwtAuthorizer
+        identitySource: [ $request.header.Authorization ]
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-esbuild
+  - serverless-auto-swagger
+  - serverless-iam-roles-per-function
+  - serverless-dynamodb-global-table-v2-plugin
+  - serverless-scriptable-plugin
+  - serverless-dynamodb
+  - serverless-offline
+
+functions:
+  jwtAuthorizer:
+    handler: handler.authenticate
+  emailVerifyOwner:
+    handler: handler.emailVerifyOwner
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - 'ses:*'
+        Resource: '*'
+  signUp: ${file(src/functions/auth/auth.yml):signUp}
+  signIn: ${file(src/functions/auth/auth.yml):signIn}
+  createShortUrl: ${file(src/functions/shortUrl/shortUrl.yml):createShortUrl}
+  redirectShortUrl: ${file(src/functions/shortUrl/shortUrl.yml):redirectShortUrl}
+  deactivateShortUrl: ${file(src/functions/shortUrl/shortUrl.yml):deactivateShortUrl}
+  myShortUrls: ${file(src/functions/shortUrl/shortUrl.yml):myShortUrls}
+  sendEmail: ${file(src/functions/notifications/notifications.yml):sendEmail}
+  scheduledDeactivateShortUrl: ${file(src/functions/notifications/notifications.yml):scheduledDeactivateShortUrl}
+
+custom:
+  scriptable:
+    hooks:
+      before:deploy:finalize: sls invoke --stage prod --function emailVerifyOwner
+  serverless-offline:
+    ignoreJWTSignature: true
+  globalTablesV2:
+    primaryRegion: us-east-1
+    tables:
+      - table: UserTable
+        addRegions:
+          - eu-west-1
+      - table: UrlTable
+        addRegions:
+          - eu-west-1
+  esbuild:
+    bundle: true
+    minify: false
+    target: 'node18'
+    platform: 'node'
+  serverless-dynamodb:
+    stages:
+      - dev
+    start:
+      noStart: true
+      port: 8000
+      docker: true
+      migrate: true
+      seed: true
+  autoswagger:
+    title: 'AWS Short Linker'
+    apiType: 'httpApi'
+    typefiles: [ './src/types/Api.ts' ]
+    generateSwaggerOnDeploy: true
+    apiKeyHeaders: [ 'authorization' ]
+
+resources:
+  Resources:
+    ShortUrlQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: ${self:provider.environment.QUEUE_NAME}
+
+    ScheduledDeactivateShortUrlPermission:
+      Type: 'AWS::Lambda::Permission'
+      Properties:
+        FunctionName: ${self:provider.environment.DEACTIVATE_SHORT_URL_FUNCTION_ARN}
+        Action: 'lambda:InvokeFunction'
+        Principal: 'events.amazonaws.com'
+        SourceArn: ${self:provider.environment.EVENT_BRIDGE_RULE_ARN}
+
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USER_TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    UrlTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.URL_TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userEmail
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.USER_EMAIL_INDEX_NAME}
+            KeySchema:
+              - AttributeName: userEmail
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
